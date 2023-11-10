@@ -17,6 +17,19 @@ The PoC uses [Apache Pulsar](https://pulsar.apache.org) messaging platform and [
 
 Different components are placed under subdirectories.
 
+Bytewax programs:
+- [`reader`](./reader/): Program to read archived messages from csv file to Pulsar.
+- [`contentparser`](./contentparser/): Program to convert raw messages to readable format.
+- [`sink`](./sink/): Program to store messages processed by data pipeline.
+
+Helper libraries:
+- [`connectors`](./connectors/): Custom connectors for Bytewax to connect, e.g., Pulsar.
+- [`ekeparser`](./ekeparser/): Python library to parse EKE's binary messages.
+
+Others:
+- [`docs`](./docs) Additional documentation files for PoC.
+
+
 For more information of each service and software component, check the README inside the subdirectory.
 
 
