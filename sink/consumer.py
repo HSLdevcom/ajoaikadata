@@ -11,7 +11,8 @@ while True:
     print("Time: ", d["eke_timestamp"])
     print("ID:", d["content"]["balise_id"])
     print("Next: ", d["content"]["balise_id_next"])
-    print("Dir", d["content"]["balise_cba"])
+    # print("Dir", d["content"]["balise_cba"])
+    print("Direction: ", d["content"].get("direction"))
     print()
     consumer.acknowledge(msg)
 

@@ -41,7 +41,6 @@ class BalisePartCombiner:
                 raise ValueError("Unexpected msg part index.")
         self.msg_refs += msgs
 
-
     def parse(self):
         if not self.first or not self.second:
             raise ValueError("Missing balise parts")
@@ -53,7 +52,7 @@ class BalisePartCombiner:
         data_obj["content"].pop("transponder_msg_part", None)
         data_obj["content"].pop("msg_index", None)
         data_obj["content"].pop("content", None)
-        
+
         # spread data in data_obj.content
         data_obj["content"].update(data)
 
@@ -97,6 +96,83 @@ def combine_balise_parts(parts_cache: BalisePartCombiner, value):
             raise ValueError("Unexpected msg part index.")
 
 
+class BaliseCache:
+    def __init__(self):
+        self.msg_refs = []
+        self.balises = []
+        self.balise_ids = []
+
+    def add_msg(self, value):
+        data = value.get("data")
+        balise_id = data["content"]["balise_id"]
+        self.msg_refs += value.get("msgs")
+        self.balises.append(data)
+        self.balise_ids.append(balise_id)
+
+    def is_complete(self):
+        return len(self.balises) == 2
+
+    def calculate_direction(self):
+        if len(self.balises) != 2:
+            raise ValueError("Balise cache is not complete")
+
+        balise1 = self.balises[0]
+        balise2 = self.balises[1]
+
+        if not balise1 or not balise2:
+            raise ValueError("Missing balise data in cache")
+
+        # Calculate direction based on balise data
+        if balise1["content"]["balise_cba"] == balise2["content"]["balise_cba"]:
+            raise ValueError("Balises have same direction")
+
+        if balise1["content"]["balise_cba"] == "1(2)":
+            direction = 1
+        else:
+            direction = 2
+
+        return direction
+
+
+def create_directions_for_balises(balise_cache, value: dict):
+    data = value.get("data")
+
+    # No balise message, skip
+    if data["msg_type"] != 5:
+        return balise_cache, value
+
+    balise_id = data["content"]["balise_id"]
+
+    if balise_id in balise_cache.balise_ids:
+        # Second message with same balise_id, calculate direction
+        balise_cache.add_msg(value)
+        try:
+            direction = balise_cache.calculate_direction()
+            data = balise_cache.balises[0]
+            data["content"]["direction"] = direction
+            msg_to_send = {"msgs": balise_cache.msg_refs, "data": data}
+        except ValueError:
+            msg_to_send = None
+
+        balise_cache = BaliseCache()
+        return balise_cache, msg_to_send
+
+    if not balise_cache.balise_ids:
+        # First message with this balise_id, add to cache
+        balise_cache.add_msg(value)
+        return balise_cache, None
+
+    # First message with this balise_id, but cache is not empty
+    # Send cache data and add new message to cache
+
+    data = balise_cache.balises[0]
+    data["content"]["direction"] = 0
+    msg_to_send = {"msgs": balise_cache.msg_refs, "data": data}
+    balise_cache = BaliseCache()
+    balise_cache.add_msg(value)
+    return balise_cache, msg_to_send
+
+
 def filter_none(data):
     key, msg = data
     if not msg:
@@ -108,6 +184,8 @@ flow = Dataflow()
 flow.input("inp", PulsarInput(input_client))
 flow.filter_map(parse_eke)
 flow.stateful_map("balise", lambda: BalisePartCombiner(), combine_balise_parts)
+flow.filter_map(filter_none)
+flow.stateful_map("balise_direction", lambda: BaliseCache(), create_directions_for_balises)
 flow.filter_map(filter_none)
 flow.output("out", PulsarOutput(output_client))
 flow.inspect(input_client.ack_msg)
