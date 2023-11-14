@@ -6,7 +6,7 @@ from .schema import Schema, FieldParser, DataContentParser
 from .stadler_udp import StadlerUDPSchema
 from .jkv_beacon import JKVBeaconSchema
 
-from config import SCHEMA_SETTINGS
+from ..config import SCHEMA_SETTINGS
 
 DATA_SCHEMA_CLASS_MAPPING = {
     1: StadlerUDPSchema,

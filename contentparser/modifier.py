@@ -2,10 +2,10 @@ import json
 
 from bytewax.dataflow import Dataflow
 
-from .connectors.pulsar import PulsarInput, PulsarOutput, PulsarClient, handle_pulsar_msg
-from .eke_parser.ekeparser import parse_eke_data
+from connectors.pulsar import PulsarInput, PulsarOutput, PulsarClient, handle_pulsar_msg
+from ekeparser.ekeparser import parse_eke_data
 
-from .eke_parser.schemas.jkv_beacon import JKVBeaconDataSchema
+from ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
 
 input_client = PulsarClient("raw")
 output_client = PulsarClient("modified")

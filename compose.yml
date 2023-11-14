@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+
+  contentparser:
+    build: .
+    environment:
+      - BYTEWAX_PYTHON_FILE_PATH=app.modifier:flow
+    volumes:
+      - ./contentparser:/bytewax/app
+      - ./connectors:/bytewax/connectors
+      - ./ekeparser:/bytewax/ekeparser
+
+  pulsar:
+    image: "apachepulsar/pulsar:3.1.1"
+    command: [ "bin/pulsar", "standalone" ]
+    volumes:
+      - pulsardata:/pulsar/data
+      - pulsarconf:/pulsar/conf
+    ports:
+      - "6650:6650"
+      - "8080:8080"
+
+volumes:
+  pulsardata:
+  pulsarconf:
