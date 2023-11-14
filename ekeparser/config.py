@@ -4,7 +4,7 @@ HEADER_SETTINGS = {
     "limit_fields": ["msg_type", "msg_name", "eke_timestamp"]
 }
 SCHEMA_SETTINGS = {
-    1: {"ignore": True},
+    1: {},
     2: {"ignore": True},
     3: {"ignore": True},
     4: {"ignore": True},

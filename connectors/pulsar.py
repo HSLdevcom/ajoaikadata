@@ -1,10 +1,16 @@
 from datetime import datetime
 import json
+import os
 
 from bytewax.outputs import PartitionedOutput, DynamicOutput, StatelessSink
 from bytewax.inputs import PartitionedInput, DynamicInput, StatefulSource, StatelessSource
 
 import pulsar
+
+# get subscription name from env, if not set, raise error
+subscription_name = os.environ.get("SUBSCRIPTION_NAME")
+if not subscription_name:
+    raise ValueError("SUBSCRIPTION_NAME not set")
 
 
 class PulsarClient:
@@ -16,7 +22,7 @@ class PulsarClient:
 
     def get_consumer(self):
         if not self.consumer:
-            self.consumer = self.client.subscribe(self.topic_name, subscription_name="my-sub")
+            self.consumer = self.client.subscribe(self.topic_name, subscription_name=subscription_name)
 
         return self.consumer
 

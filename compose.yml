@@ -7,13 +7,24 @@ services:
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.modifier:flow
       - INPUT_TOPIC=raw
-      - OUTPUT_TOPIC=modified
+      - SUBSCRIPTION_NAME=contentparser
+      - OUTPUT_TOPIC=parsed
     volumes:
       - ./contentparser:/bytewax/app
       - ./connectors:/bytewax/connectors
       - ./ekeparser:/bytewax/ekeparser
     depends_on:
       - pulsar
+
+  sink:
+    build: .
+    environment:
+      - BYTEWAX_PYTHON_FILE_PATH=app.printer:flow
+      - INPUT_TOPIC=parsed
+      - SUBSCRIPTION_NAME=sink
+    volumes:
+      - ./sink:/bytewax/app
+      - ./connectors:/bytewax/connectors
 
   pulsar:
     image: "apachepulsar/pulsar:3.1.1"
