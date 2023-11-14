@@ -1,14 +1,19 @@
 version: "3.8"
+
 services:
 
   contentparser:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.modifier:flow
+      - INPUT_TOPIC=raw
+      - OUTPUT_TOPIC=modified
     volumes:
       - ./contentparser:/bytewax/app
       - ./connectors:/bytewax/connectors
       - ./ekeparser:/bytewax/ekeparser
+    depends_on:
+      - pulsar
 
   pulsar:
     image: "apachepulsar/pulsar:3.1.1"
