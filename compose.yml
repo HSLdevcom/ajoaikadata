@@ -14,28 +14,58 @@ services:
       - ./connectors:/bytewax/connectors
       - ./ekeparser:/bytewax/ekeparser
     depends_on:
-      - pulsar
+      pulsar:
+        condition: service_healthy
+      db:
+        condition: service_healthy
 
   sink:
     build: .
     environment:
-      - BYTEWAX_PYTHON_FILE_PATH=app.printer:flow
+      - BYTEWAX_PYTHON_FILE_PATH=app.postgres:flow
       - INPUT_TOPIC=parsed
       - SUBSCRIPTION_NAME=sink
+      - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres
     volumes:
       - ./sink:/bytewax/app
       - ./connectors:/bytewax/connectors
+    depends_on:
+      pulsar:
+        condition: service_healthy
+      db:
+        condition: service_healthy
 
   pulsar:
     image: "apachepulsar/pulsar:3.1.1"
     command: [ "bin/pulsar", "standalone" ]
     volumes:
-      - pulsardata:/pulsar/data
+      # - pulsardata:/pulsar/data
       - pulsarconf:/pulsar/conf
     ports:
       - "6650:6650"
       - "8080:8080"
+    healthcheck:
+      test: ["CMD", "bin/pulsar-admin", "brokers", "healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: "timescale/timescaledb-ha:pg15.4-ts2.11.2-all"
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  pulsardata:
+  # pulsardata:
   pulsarconf:
