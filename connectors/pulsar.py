@@ -37,8 +37,6 @@ class PulsarClient:
             raise TypeError("Client not configured as a consumer. Cannot ack the messages")
 
         message_objects = content.get("msgs")
-        if len(message_objects) > 1:
-            print(f"Acking multiple messages {len(message_objects)}")
 
         for msg_obj in message_objects:
             self.consumer.acknowledge(msg_obj)
@@ -56,11 +54,11 @@ class PulsarSource(StatelessSource):
         return None
 
     def next_batch(self):
-        msg = self.consumer.receive()
+        msgs = self.consumer.batch_receive()
 
-        if msg is None:
+        if not msgs:
             return []
-        return [(msg.partition_key(), {"msgs": [msg], "data": json.loads(msg.data())})]
+        return [(msg.partition_key(), {"msgs": [msg], "data": json.loads(msg.data())}) for msg in msgs]
 
     def close(self):
         self.client.close()
