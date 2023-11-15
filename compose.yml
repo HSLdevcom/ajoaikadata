@@ -2,6 +2,20 @@ version: "3.8"
 
 services:
 
+  reader:
+    build: .
+    environment:
+      - BYTEWAX_PYTHON_FILE_PATH=app.reader:flow
+      - SUBSCRIPTION_NAME=reader # not used
+      - OUTPUT_TOPIC=raw
+    volumes:
+      - ./reader:/bytewax/app
+      - ./data:/data
+      - ./connectors:/bytewax/connectors
+    depends_on:
+      pulsar:
+        condition: service_healthy
+
   contentparser:
     build: .
     environment:
@@ -15,8 +29,6 @@ services:
       - ./ekeparser:/bytewax/ekeparser
     depends_on:
       pulsar:
-        condition: service_healthy
-      db:
         condition: service_healthy
 
   sink:
@@ -45,7 +57,7 @@ services:
       - "6650:6650"
       - "8080:8080"
     healthcheck:
-      test: ["CMD", "bin/pulsar-admin", "brokers", "healthcheck"]
+      test: [ "CMD", "bin/pulsar-admin", "brokers", "healthcheck" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -61,7 +73,7 @@ services:
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
