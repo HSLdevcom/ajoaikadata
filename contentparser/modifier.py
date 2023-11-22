@@ -6,6 +6,11 @@ from ekeparser.ekeparser import parse_eke_data
 
 from ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
 # read topic names from env
 input_topic = os.environ.get("INPUT_TOPIC")
 output_topic = os.environ.get("OUTPUT_TOPIC")
@@ -62,7 +67,11 @@ class BalisePartCombiner:
 def parse_eke(msg):
     key, value = msg
     data = value.get("data")
-    data = parse_eke_data(data.get("raw"), data.get("topic"))
+    try:
+        data = parse_eke_data(data.get("raw"), data.get("topic"))
+    except ValueError:
+        logger.error(f"Failed to parse eke data. Value was: {value}")
+        data = None
 
     if not data:
         input_client.ack_msg(msg)

@@ -1,8 +1,14 @@
 from csv import DictReader
+import gzip
 from pathlib import Path
 from typing import Any
 
 from bytewax.inputs import PartitionedInput, StatefulSource, batch
+
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 def _readlines(files):
     """Turn a list of files into a generator of lines but support `tell`.
@@ -13,26 +19,53 @@ def _readlines(files):
 
     """
     for file in files:
-        with open(file, "rt", newline="") as f:
-            f.readline() # skip header
-            while True:
-                line = f.readline()
-                if len(line) <= 0:
-                    break
-                yield line
+        logger.info(f"Reading file: {file}")
+        # if file is csv, use open, else use gzip.open
+        if file.endswith(".csv"):
+            f = open(file, "rt", newline="")
+        else:
+            f = gzip.open(file, "rt", newline="")
+        
+        f.readline() # skip header
+        counter = 0
+        while True:
+            line = f.readline()
+            if len(line) <= 0:
+                break
+            yield line
+            counter += 1
+            if counter % 1000 == 0:
+                logger.info(f"Read {counter} lines from file: {file}")
+        
+        logger.info(f"File {file} read complete. Read {counter} lines.")
+        f.close()
+
 
 
 class CSVDirSource(StatefulSource):
     def __init__(self, path, pattern, batch_size, fmtparams):
         # list all files in the directory, filter by pattern and sort
-        files = sorted([str(f) for f in Path(path).glob(f"*{pattern}.csv")])
+        # supports both csv and gzipped csv
+        files = sorted([str(f) for f in Path(path).glob(f"*{pattern}.csv*")])
 
-        self.reader = DictReader(_readlines(files), fieldnames=["filename", "value1", "value2"], **fmtparams)
+        self.reader = DictReader(
+            _readlines(files),
+            fieldnames=[
+                "message_type",
+                "ntp_timestamp",
+                "ntp_ok",
+                "eke_timestamp",
+                "mqtt_timestamp",
+                "mqtt_topic",
+                "raw_data",
+            ],
+            **fmtparams,
+        )
         self._batcher = batch(self.reader, batch_size)
 
     def next_batch(self):
         return next(self._batcher)
-    
+
     def snapshot(self) -> Any:
         return None
 
@@ -50,11 +83,8 @@ class CSVDirInput(PartitionedInput):
         self._fmtparams = fmtparams
 
     def list_parts(self):
-        # Patterns. TODO: Change to vehicle ids.
-        return ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        """ Each partition is a vehicle id. TODO: make this configurable. """
+        return [str(i) for i in range(1, 101)]
 
     def build_part(self, for_part, resume_state):
-        """See ABC docstring."""
-        # TODO: Warn and return None. Then we could support
-        # continuation from a different file.
         return CSVDirSource(self._path, for_part, self._batch_size, self._fmtparams)

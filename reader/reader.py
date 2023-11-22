@@ -1,8 +1,10 @@
 import os
+from pathlib import Path
+
 from bytewax.dataflow import Dataflow
-from bytewax.connectors.files import CSVInput
 
 from connectors.pulsar import PulsarOutput, PulsarClient
+from connectors.csv_directory import CSVDirInput
 
 
 # read topic names from env
@@ -23,6 +25,6 @@ def create_pulsar_msg(value):
 
 
 flow = Dataflow()
-flow.input("inp", CSVInput("/data/2023-09-04T06_vehicle_42.csv"))
+flow.input("inp", CSVDirInput(Path("/data/")))
 flow.map(create_pulsar_msg)
 flow.output("out", PulsarOutput(output_client))

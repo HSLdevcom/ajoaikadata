@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 import os
 
-from bytewax.outputs import PartitionedOutput, DynamicOutput, StatelessSink
+from bytewax.outputs import DynamicOutput, StatelessSink
 import psycopg
 
 
@@ -17,7 +17,6 @@ class PostgresClient:
         self.connection = psycopg.connect(POSTGRES_CONN_STR)
 
     def insert(self, rows: list) -> None:
-        print(rows)
         with self.connection.cursor() as cur:
             cur.executemany(
                 """
@@ -45,7 +44,7 @@ class PostgresSink(StatelessSink):
         for msg in data:
             key, content = msg
             msg_data: dict = content.get("data", "")
-            
+
             msgs.append(
                 {
                     "timestamp": msg_data.get("eke_timestamp"),
