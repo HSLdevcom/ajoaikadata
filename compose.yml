@@ -6,6 +6,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.reader:flow
+      - BYTEWAX_PYTHON_PARAMETERS=-p 2 -w 5
       - SUBSCRIPTION_NAME=reader # not used
       - OUTPUT_TOPIC=raw
     volumes:
@@ -15,11 +16,16 @@ services:
     depends_on:
       pulsar:
         condition: service_healthy
+      contentparser:
+        condition: service_started
+      sink:
+        condition: service_started
 
   contentparser:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.modifier:flow
+      - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 10
       - INPUT_TOPIC=raw
       - SUBSCRIPTION_NAME=contentparser
       - OUTPUT_TOPIC=parsed
@@ -35,6 +41,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.postgres:flow
+      - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 10
       - INPUT_TOPIC=parsed
       - SUBSCRIPTION_NAME=sink
       - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres

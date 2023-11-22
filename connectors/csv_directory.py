@@ -34,8 +34,6 @@ def _readlines(files):
                 break
             yield line
             counter += 1
-            if counter % 1000 == 0:
-                logger.info(f"Read {counter} lines from file: {file}")
         
         logger.info(f"File {file} read complete. Read {counter} lines.")
         f.close()

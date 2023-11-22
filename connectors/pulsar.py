@@ -20,15 +20,15 @@ class PulsarClient:
         self.producer = None
         self.consumer = None
 
-    def get_consumer(self):
+    def get_consumer(self, worker_index = 0):
         if not self.consumer:
-            self.consumer = self.client.subscribe(self.topic_name, subscription_name=subscription_name)
+            self.consumer = self.client.subscribe(self.topic_name, subscription_name=subscription_name, consumer_name=f"{subscription_name}-{worker_index}", consumer_type=pulsar.ConsumerType.KeyShared)
 
         return self.consumer
 
-    def get_producer(self):
+    def get_producer(self, worker_index = 0):
         if not self.producer:
-            self.producer = self.client.create_producer(self.topic_name)
+            self.producer = self.client.create_producer(self.topic_name, producer_name=f"{subscription_name}-{worker_index}")
         return self.producer
 
     def ack_msg(self, msg):
@@ -46,9 +46,9 @@ class PulsarClient:
 
 
 class PulsarSource(StatelessSource):
-    def __init__(self, client: PulsarClient):
+    def __init__(self, client: PulsarClient, worker_index):
         self.client = client
-        self.consumer = self.client.get_consumer()
+        self.consumer = self.client.get_consumer(worker_index)
 
     def next_awake(self) -> datetime | None:
         return None
@@ -70,13 +70,13 @@ class PulsarInput(DynamicInput):
         self.client = client
 
     def build(self, worker_index, worker_count):
-        return PulsarSource(self.client)
+        return PulsarSource(self.client, worker_index)
 
 
 class PulsarSink(StatelessSink):
-    def __init__(self, client: PulsarClient):
+    def __init__(self, client: PulsarClient, worker_index):
         self.client = client
-        self.producer = self.client.get_producer()
+        self.producer = self.client.get_producer(worker_index)
 
     def write_batch(self, data):
         for msg in data:
@@ -94,4 +94,4 @@ class PulsarOutput(DynamicOutput):
         self.client = client
 
     def build(self, worker_index, worker_count):
-        return PulsarSink(self.client)
+        return PulsarSink(self.client, worker_index)

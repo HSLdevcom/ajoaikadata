@@ -1,10 +1,8 @@
-from datetime import datetime
 import json
 import os
 
 from bytewax.outputs import DynamicOutput, StatelessSink
-import psycopg
-
+import psycopg_pool
 
 # get postgres connection str from env, if not set, raise error
 POSTGRES_CONN_STR = os.environ.get("POSTGRES_CONN_STR")
@@ -14,24 +12,24 @@ if not POSTGRES_CONN_STR:
 
 class PostgresClient:
     def __init__(self) -> None:
-        self.connection = psycopg.connect(POSTGRES_CONN_STR)
+        self.pool = psycopg_pool.ConnectionPool(POSTGRES_CONN_STR, min_size=1, max_size=20)
 
     def insert(self, rows: list) -> None:
-        with self.connection.cursor() as cur:
-            cur.executemany(
-                """
-                INSERT INTO messages (timestamp, msg_type, vehicle_id, message)
-                VALUES(%(timestamp)s, %(msg_type)s, %(vehicle_id)s, %(message)s)
-                ON CONFLICT (timestamp, msg_type, vehicle_id)
-                DO UPDATE SET message = EXCLUDED.message; 
-                """,
-                rows,
-            )
-            self.connection.commit()
+        with self.pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.executemany(
+                    """
+                    INSERT INTO messages (timestamp, msg_type, vehicle_id, message)
+                    VALUES(%(timestamp)s, %(msg_type)s, %(vehicle_id)s, %(message)s)
+                    ON CONFLICT (timestamp, msg_type, vehicle_id)
+                    DO UPDATE SET message = EXCLUDED.message; 
+                    """,
+                    rows,
+                )
+            conn.commit()
 
     def close(self):
-        self.connection.commit()
-        self.connection.close()
+        self.pool.close()
 
 
 class PostgresSink(StatelessSink):
