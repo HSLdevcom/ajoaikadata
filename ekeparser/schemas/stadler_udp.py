@@ -7,6 +7,13 @@ CABIN_TYPES = {
     0b11: "AB"
 }
 
+def doors_parser(content: bytes) -> bool:
+    # iterate over doors
+    for byte in content:
+        # check if any of the last 6 bits are set
+        if byte & 0x3F:
+            return True # early return if any of the bits are set
+    return False
 
 def cabin_parser(content: bytes) -> str | None:
     bits = content[0] & 0x3  # Last 2 bits
@@ -24,7 +31,9 @@ class StadlerUDPSchema(Schema):
     FIELDS = [
         FieldParser(["packet_no"], 0, 0, int_parser),
         FieldParser(["speed"], 4, 7, float_parser),
-        FieldParser(["total_km"], 8, 9, int_parser),
+        FieldParser(["odo"], 8, 9, int_parser),
+        FieldParser(["standstill"], 20, 20, int_parser),
+        FieldParser(["doors_open"], 21, 28, doors_parser),
         FieldParser(["main_brake_pipe_pressure"], 92, 95, float_parser),
         FieldParser(["active_cabin"], 143, 143, cabin_parser),
         FieldParser(["vehicle_pos_on_train", "vehicle_no"], 145, 149, vehicle_parser),

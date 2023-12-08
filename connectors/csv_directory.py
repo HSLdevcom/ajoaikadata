@@ -6,6 +6,7 @@ from typing import Any
 from bytewax.inputs import PartitionedInput, StatefulSource, batch
 
 import logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -25,8 +26,8 @@ def _readlines(files):
             f = open(file, "rt", newline="")
         else:
             f = gzip.open(file, "rt", newline="")
-        
-        f.readline() # skip header
+
+        f.readline()  # skip header
         counter = 0
         while True:
             line = f.readline()
@@ -34,17 +35,16 @@ def _readlines(files):
                 break
             yield line
             counter += 1
-        
+
         logger.info(f"File {file} read complete. Read {counter} lines.")
         f.close()
-
 
 
 class CSVDirSource(StatefulSource):
     def __init__(self, path, pattern, batch_size, fmtparams):
         # list all files in the directory, filter by pattern and sort
         # supports both csv and gzipped csv
-        files = sorted([str(f) for f in Path(path).glob(f"*{pattern}.csv*")])
+        files = sorted([str(f) for f in Path(path).glob(f"*_{pattern}.csv*")])
 
         self.reader = DictReader(
             _readlines(files),
@@ -81,7 +81,7 @@ class CSVDirInput(PartitionedInput):
         self._fmtparams = fmtparams
 
     def list_parts(self):
-        """ Each partition is a vehicle id. TODO: make this configurable. """
+        """Each partition is a vehicle id. TODO: make this configurable."""
         return [str(i) for i in range(1, 101)]
 
     def build_part(self, for_part, resume_state):

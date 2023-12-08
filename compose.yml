@@ -6,7 +6,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.reader:flow
-      - BYTEWAX_PYTHON_PARAMETERS=-p 2 -w 5
+      - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 4
       - SUBSCRIPTION_NAME=reader # not used
       - OUTPUT_TOPIC=raw
     volumes:
@@ -25,7 +25,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.modifier:flow
-      - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 10
+      - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 20
       - INPUT_TOPIC=raw
       - SUBSCRIPTION_NAME=contentparser
       - OUTPUT_TOPIC=parsed
@@ -33,6 +33,20 @@ services:
       - ./contentparser:/bytewax/app
       - ./connectors:/bytewax/connectors
       - ./ekeparser:/bytewax/ekeparser
+    depends_on:
+      pulsar:
+        condition: service_healthy
+
+  trafficeventer:
+    build: .
+    environment:
+      - BYTEWAX_PYTHON_FILE_PATH=app.eventer:flow
+      - INPUT_TOPIC=parsed
+      - SUBSCRIPTION_NAME=trafficeventer
+      - OUTPUT_TOPIC=events
+    volumes:
+      - ./trafficeventer:/bytewax/app
+      - ./connectors:/bytewax/connectors
     depends_on:
       pulsar:
         condition: service_healthy
