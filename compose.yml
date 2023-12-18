@@ -6,7 +6,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.reader:flow
-      - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 4
+      - BYTEWAX_PYTHON_PARAMETERS=-p 3 -w 3
       - SUBSCRIPTION_NAME=reader # not used
       - OUTPUT_TOPIC=raw
     volumes:
@@ -25,7 +25,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.modifier:flow
-      - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 20
+      - BYTEWAX_PYTHON_PARAMETERS=-p 2 -w 2
       - INPUT_TOPIC=raw
       - SUBSCRIPTION_NAME=contentparser
       - OUTPUT_TOPIC=parsed
@@ -41,6 +41,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.eventer:flow
+      - BYTEWAX_PYTHON_PARAMETERS=-p 2 -w 2
       - INPUT_TOPIC=parsed
       - SUBSCRIPTION_NAME=trafficeventer
       - OUTPUT_TOPIC=events
@@ -55,7 +56,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.postgres:flow
-      - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 10
+      - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 5
       - INPUT_TOPIC=parsed
       - SUBSCRIPTION_NAME=sink
       - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres

@@ -39,7 +39,7 @@ class PulsarClient:
         message_objects = content.get("msgs")
 
         for msg_obj in message_objects:
-            self.consumer.acknowledge(msg_obj)
+            self.consumer.acknowledge(pulsar.MessageId.deserialize(msg_obj))
 
     def close(self):
         self.client.close()
@@ -58,10 +58,10 @@ class PulsarSource(StatelessSource):
 
         if not msgs:
             return []
-        return [(msg.partition_key(), {"msgs": [msg], "data": json.loads(msg.data())}) for msg in msgs]
+        return [(msg.partition_key(), {"msgs": [msg.message_id().serialize()], "data": json.loads(msg.data())}) for msg in msgs]
 
     def close(self):
-        self.client.close()
+        self.consumer.close()
 
 
 class PulsarInput(DynamicInput):
@@ -85,7 +85,8 @@ class PulsarSink(StatelessSink):
             self.producer.send(msg_data.encode("utf-8"), partition_key=key)
 
     def close(self):
-        self.client.close()
+        self.producer.flush()
+        self.producer.close()
 
 
 class PulsarOutput(DynamicOutput):
