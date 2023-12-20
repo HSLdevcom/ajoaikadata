@@ -1,9 +1,10 @@
 import json
 import os
-from typing import List, TypedDict
+from typing import Callable, List, TypedDict
 from datetime import datetime
 
 from bytewax.outputs import DynamicOutput, StatelessSink
+from psycopg import sql
 import psycopg_pool
 
 from .types import BytewaxMsgFromPulsar
@@ -22,19 +23,23 @@ class EkeMessageRow(TypedDict):
 
 
 class PostgresClient:
-    def __init__(self) -> None:
+    def __init__(self, query: sql.SQL, mapper: Callable[[dict], dict]) -> None:
         self.pool = psycopg_pool.ConnectionPool(POSTGRES_CONN_STR, min_size=1, max_size=20)
+        self.query = query
+        self.mapper = mapper
 
-    def insert(self, rows: List[EkeMessageRow]) -> None:
+    def insert(self, data: List[BytewaxMsgFromPulsar]) -> None:
+        rows = []
+        for msg in data:
+            key, content = msg
+            msg_data = content["data"]
+
+            rows.append(self.mapper(msg_data))
+
         with self.pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.executemany(
-                    """
-                    INSERT INTO messages (timestamp, msg_type, vehicle_id, message)
-                    VALUES(%(timestamp)s, %(msg_type)s, %(vehicle_id)s, %(message)s)
-                    ON CONFLICT (timestamp, msg_type, vehicle_id)
-                    DO UPDATE SET message = EXCLUDED.message; 
-                    """,
+                    self.query,
                     rows,
                 )
             conn.commit()
@@ -48,22 +53,7 @@ class PostgresSink(StatelessSink):
         self.client = client
 
     def write_batch(self, data: List[BytewaxMsgFromPulsar]):
-        msgs: List[EkeMessageRow] = []
-
-        for msg in data:
-            key, content = msg
-            msg_data = content["data"]
-
-            msgs.append(
-                {
-                    "timestamp": msg_data["eke_timestamp"],
-                    "msg_type": msg_data["msg_type"],
-                    "vehicle_id": msg_data["vehicle"],
-                    "message": json.dumps(msg_data),
-                }
-            )
-
-        self.client.insert(msgs)
+        self.client.insert(data)
 
     def close(self):
         self.client.close()

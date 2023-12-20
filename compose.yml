@@ -18,7 +18,9 @@ services:
         condition: service_healthy
       contentparser:
         condition: service_started
-      sink:
+      messagesink:
+        condition: service_started
+      eventsink:
         condition: service_started
 
   contentparser:
@@ -52,14 +54,33 @@ services:
       pulsar:
         condition: service_healthy
 
-  sink:
+  messagesink:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.postgres:flow
       - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 2
       - INPUT_TOPIC=parsed
-      - SUBSCRIPTION_NAME=sink
+      - SUBSCRIPTION_NAME=messagesink
       - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres
+      - SINK_SCHEMA=MESSAGES
+    volumes:
+      - ./sink:/bytewax/app
+      - ./connectors:/bytewax/connectors
+    depends_on:
+      pulsar:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
+  eventsink:
+    build: .
+    environment:
+      - BYTEWAX_PYTHON_FILE_PATH=app.postgres:flow
+      - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 2
+      - INPUT_TOPIC=events
+      - SUBSCRIPTION_NAME=messagesink
+      - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres
+      - SINK_SCHEMA=EVENTS
     volumes:
       - ./sink:/bytewax/app
       - ./connectors:/bytewax/connectors
