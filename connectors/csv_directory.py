@@ -30,7 +30,7 @@ def _readlines(files):
         f.readline()  # skip header
         counter = 0
         while True:
-            line = f.readline()
+            line = str(f.readline())  # ensure it's string
             if len(line) <= 0:
                 break
             yield line
@@ -48,7 +48,7 @@ class CSVDirSource(StatefulSource):
 
         self.reader = DictReader(
             _readlines(files),
-            fieldnames=[
+            fieldnames=[  ## TODO: parametrize
                 "message_type",
                 "ntp_timestamp",
                 "ntp_ok",

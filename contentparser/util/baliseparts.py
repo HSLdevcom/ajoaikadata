@@ -1,5 +1,6 @@
 from typing import List, TypedDict
 
+from connectors.types import PulsarMsg
 from ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
 
 BEACON_DATA_SCHEMA = JKVBeaconDataSchema()
@@ -14,7 +15,7 @@ def create_empty_parts_cache() -> BalisePartsCache:
     return {"msg_refs": [], "parts": []}
 
 
-def add_msg_to_parts_cache(parts_cache: BalisePartsCache, value: dict) -> None:
+def add_msg_to_parts_cache(parts_cache: BalisePartsCache, value: PulsarMsg) -> None:
     data = value["data"]
     msgs = value["msgs"]
     match data["content"]["transponder_msg_part"]:

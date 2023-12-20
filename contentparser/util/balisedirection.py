@@ -1,5 +1,5 @@
 from typing import List, Literal, TypedDict
-
+from connectors.types import PulsarMsg
 
 class BaliseDirectionCache(TypedDict):
     """Dict which contains information from multiple balises for direction calculation."""
@@ -18,7 +18,7 @@ def create_empty_balise_cache() -> BaliseDirectionCache:
     }
 
 
-def add_msg_to_balise_cache(balise_cache: BaliseDirectionCache, value: dict):
+def add_msg_to_balise_cache(balise_cache: BaliseDirectionCache, value: PulsarMsg):
     """Add new msg to the balise."""
     data = value["data"]
     balise_id = data["content"]["balise_id"]

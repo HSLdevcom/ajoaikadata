@@ -5,7 +5,7 @@ from bytewax.dataflow import Dataflow
 
 from connectors.pulsar import PulsarOutput, PulsarClient
 from connectors.csv_directory import CSVDirInput
-
+from connectors.types import BytewaxMsgFromCSV
 
 # read topic names from env
 output_topic = os.environ.get("OUTPUT_TOPIC")
@@ -16,7 +16,7 @@ if not output_topic:
 output_client = PulsarClient(output_topic)
 
 
-def create_pulsar_msg(value):
+def create_pulsar_msg(value) -> BytewaxMsgFromCSV:
     topic_name = value["mqtt_topic"]
     vehicle = topic_name.split("/")[3]
 

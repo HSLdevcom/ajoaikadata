@@ -1,20 +1,31 @@
 import json
 import os
+from typing import List, TypedDict
+from datetime import datetime
 
 from bytewax.outputs import DynamicOutput, StatelessSink
 import psycopg_pool
 
+from .types import BytewaxMsgFromPulsar
+
 # get postgres connection str from env, if not set, raise error
-POSTGRES_CONN_STR = os.environ.get("POSTGRES_CONN_STR")
+POSTGRES_CONN_STR: str = os.environ.get("POSTGRES_CONN_STR", "")
 if not POSTGRES_CONN_STR:
     raise ValueError("POSTGRES_CONN_STR not set")
+
+
+class EkeMessageRow(TypedDict):
+    timestamp: datetime
+    msg_type: int
+    vehicle_id: int
+    message: str
 
 
 class PostgresClient:
     def __init__(self) -> None:
         self.pool = psycopg_pool.ConnectionPool(POSTGRES_CONN_STR, min_size=1, max_size=20)
 
-    def insert(self, rows: list) -> None:
+    def insert(self, rows: List[EkeMessageRow]) -> None:
         with self.pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.executemany(
@@ -36,18 +47,18 @@ class PostgresSink(StatelessSink):
     def __init__(self, client: PostgresClient) -> None:
         self.client = client
 
-    def write_batch(self, data: list[tuple[str, dict]]):
-        msgs = []
+    def write_batch(self, data: List[BytewaxMsgFromPulsar]):
+        msgs: List[EkeMessageRow] = []
 
         for msg in data:
             key, content = msg
-            msg_data: dict = content.get("data", "")
+            msg_data = content["data"]
 
             msgs.append(
                 {
-                    "timestamp": msg_data.get("eke_timestamp"),
-                    "msg_type": msg_data.get("msg_type"),
-                    "vehicle_id": msg_data.get("vehicle"),
+                    "timestamp": msg_data["eke_timestamp"],
+                    "msg_type": msg_data["msg_type"],
+                    "vehicle_id": msg_data["vehicle"],
                     "message": json.dumps(msg_data),
                 }
             )

@@ -3,6 +3,7 @@ from typing import Tuple
 from bytewax.dataflow import Dataflow
 
 from connectors.pulsar import PulsarInput, PulsarOutput, PulsarClient
+from connectors.types import BytewaxMsgFromPulsar, PulsarMsg
 from ekeparser.ekeparser import parse_eke_data
 
 from ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
@@ -41,11 +42,11 @@ output_client = PulsarClient(output_topic)
 BEACON_DATA_SCHEMA = JKVBeaconDataSchema()
 
 
-def parse_eke(msg):
+def parse_eke(msg: BytewaxMsgFromPulsar) -> BytewaxMsgFromPulsar | None:
     key, value = msg
-    data = value.get("data")
+    data = value["data"]
     try:
-        data = parse_eke_data(data.get("raw"), data.get("topic"))
+        data = parse_eke_data(data["raw"], data["topic"])
     except ValueError:
         logger.error(f"Failed to parse eke data. Value was: {value}")
         data = None
@@ -54,11 +55,11 @@ def parse_eke(msg):
         input_client.ack_msg(msg)
         return None
 
-    value["data"] = data
+    value["data"] = data  # assign parsed data to msg
     return (key, value)
 
 
-def combine_balise_parts(parts_cache: BalisePartsCache, value: dict) -> Tuple[BalisePartsCache, dict | None]:
+def combine_balise_parts(parts_cache: BalisePartsCache, value: PulsarMsg) -> Tuple[BalisePartsCache, PulsarMsg | None]:
     data = value["data"]
 
     # No balise message, skip
@@ -74,7 +75,7 @@ def combine_balise_parts(parts_cache: BalisePartsCache, value: dict) -> Tuple[Ba
                 add_msg_to_parts_cache(parts_cache, value)
                 try:
                     parsed_msg = parse_balise_msg_from_parts(parts_cache)
-                    msg_to_send = {"msgs": parts_cache["msg_refs"], "data": parsed_msg}
+                    msg_to_send: PulsarMsg | None = {"msgs": parts_cache["msg_refs"], "data": parsed_msg}
                 except ValueError:
                     msg_to_send = None
                 return create_empty_parts_cache(), msg_to_send
@@ -82,13 +83,14 @@ def combine_balise_parts(parts_cache: BalisePartsCache, value: dict) -> Tuple[Ba
                 raise ValueError("Unexpected msg part index.")
     except ValueError as e:
         logger.error(e)
-        for msg in parts_cache["msg_refs"]:
-            input_client.ack_msg(msg)
+        input_client.ack_msg(("", {"msgs": parts_cache["msg_refs"], "data": {}}))
+
         return create_empty_parts_cache(), None
 
+
 def create_directions_for_balises(
-    balise_cache: BaliseDirectionCache, value: dict
-) -> Tuple[BaliseDirectionCache, dict | None]:
+    balise_cache: BaliseDirectionCache, value: PulsarMsg
+) -> Tuple[BaliseDirectionCache, PulsarMsg | None]:
     data = value["data"]
 
     # No balise message, skip
@@ -104,7 +106,7 @@ def create_directions_for_balises(
             direction = calculate_direction(balise_cache)
             data = balise_cache["balises"][0]
             data["content"]["direction"] = direction
-            msg_to_send = {"msgs": balise_cache["msg_refs"], "data": data}
+            msg_to_send: PulsarMsg | None = {"msgs": balise_cache["msg_refs"], "data": data}
         except ValueError:
             msg_to_send = None
 
@@ -127,7 +129,7 @@ def create_directions_for_balises(
     return balise_cache, msg_to_send
 
 
-def filter_none(data):
+def filter_none(data: BytewaxMsgFromPulsar):
     key, msg = data
     if not msg:
         return None
