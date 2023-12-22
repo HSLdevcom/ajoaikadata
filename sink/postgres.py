@@ -8,6 +8,7 @@ from psycopg import sql
 
 from connectors.pulsar import PulsarInput, PulsarClient
 from connectors.postgres import PostgresOutput, PostgresClient
+from connectors.types import BytewaxMsgFromPulsar
 
 PG_SCHEMA = {
     "MESSAGES": {
@@ -59,7 +60,12 @@ pulsar_client = PulsarClient(input_topic)
 postgres_client = PostgresClient(SCHEMA_DETAILS["query"], SCHEMA_DETAILS["mapper"])
 
 
+def ack(data: BytewaxMsgFromPulsar):
+    key, value = data
+    pulsar_client.ack_msgs(value["msgs"])
+
+
 flow = Dataflow()
 flow.input("inp", PulsarInput(pulsar_client))
 flow.output("out", PostgresOutput(postgres_client))
-flow.inspect(pulsar_client.ack_msg)
+flow.inspect(ack)

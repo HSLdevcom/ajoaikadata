@@ -52,7 +52,7 @@ def parse_eke(msg: BytewaxMsgFromPulsar) -> BytewaxMsgFromPulsar | None:
         data = None
 
     if not data:
-        input_client.ack_msg(msg)
+        input_client.ack_msgs(value["msgs"])
         return None
 
     value["data"] = data  # assign parsed data to msg
@@ -69,10 +69,9 @@ def combine_balise_parts(parts_cache: BalisePartsCache, value: PulsarMsg) -> Tup
     try:
         match data["content"]["transponder_msg_part"]:
             case 0:
-                add_msg_to_parts_cache(parts_cache, value)
-                return parts_cache, None
+                return add_msg_to_parts_cache(parts_cache, value), None
             case 1:
-                add_msg_to_parts_cache(parts_cache, value)
+                parts_cache = add_msg_to_parts_cache(parts_cache, value)
                 try:
                     parsed_msg = parse_balise_msg_from_parts(parts_cache)
                     msg_to_send: PulsarMsg | None = {"msgs": parts_cache["msg_refs"], "data": parsed_msg}
@@ -83,7 +82,7 @@ def combine_balise_parts(parts_cache: BalisePartsCache, value: PulsarMsg) -> Tup
                 raise ValueError("Unexpected msg part index.")
     except ValueError as e:
         logger.error(e)
-        input_client.ack_msg(("", {"msgs": parts_cache["msg_refs"], "data": {}}))
+        input_client.ack_msgs(parts_cache["msg_refs"])
 
         return create_empty_parts_cache(), None
 
@@ -101,7 +100,7 @@ def create_directions_for_balises(
 
     if balise_id == balise_cache["balise_id"]:
         # Second message with same balise_id, calculate direction
-        add_msg_to_balise_cache(balise_cache, value)
+        balise_cache = add_msg_to_balise_cache(balise_cache, value)
         try:
             direction = calculate_direction(balise_cache)
             data = balise_cache["balises"][0]
@@ -110,13 +109,11 @@ def create_directions_for_balises(
         except ValueError:
             msg_to_send = None
 
-        balise_cache = create_empty_balise_cache()
-        return balise_cache, msg_to_send
+        return create_empty_balise_cache(), msg_to_send
 
     if not balise_cache["balise_id"]:
         # First message with this balise_id, add to cache
-        add_msg_to_balise_cache(balise_cache, value)
-        return balise_cache, None
+        return add_msg_to_balise_cache(balise_cache, value), None
 
     # First message with this balise_id, but cache is not empty
     # Send cache data and add new message to cache
@@ -124,9 +121,7 @@ def create_directions_for_balises(
     data = balise_cache["balises"][0]
     data["content"]["direction"] = 0
     msg_to_send = {"msgs": balise_cache["msg_refs"], "data": data}
-    balise_cache = create_empty_balise_cache()
-    add_msg_to_balise_cache(balise_cache, value)
-    return balise_cache, msg_to_send
+    return add_msg_to_balise_cache(create_empty_balise_cache(), value), msg_to_send
 
 
 def filter_none(data: BytewaxMsgFromPulsar):
@@ -134,6 +129,11 @@ def filter_none(data: BytewaxMsgFromPulsar):
     if not msg:
         return None
     return data
+
+
+def ack(data: BytewaxMsgFromPulsar):
+    key, value = data
+    input_client.ack_msgs(value["msgs"])
 
 
 flow = Dataflow()
@@ -144,4 +144,4 @@ flow.filter_map(filter_none)
 flow.stateful_map("balise_direction", lambda: create_empty_balise_cache(), create_directions_for_balises)
 flow.filter_map(filter_none)
 flow.output("out", PulsarOutput(output_client))
-flow.inspect(input_client.ack_msg)
+flow.inspect(ack)

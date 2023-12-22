@@ -1,10 +1,10 @@
 from datetime import datetime
 import json
 import os
-from typing import List, Tuple, TypedDict
+from typing import List
 
-from bytewax.outputs import PartitionedOutput, DynamicOutput, StatelessSink
-from bytewax.inputs import PartitionedInput, DynamicInput, StatefulSource, StatelessSource
+from bytewax.outputs import DynamicOutput, StatelessSink
+from bytewax.inputs import DynamicInput, StatelessSource
 
 import pulsar
 
@@ -43,16 +43,13 @@ class PulsarClient:
             )
         return self.producer
 
-    def ack_msg(self, msg: BytewaxMsgFromPulsar) -> None:
+    def ack_msgs(self, msgs: List[str]) -> None:
         """Acknowledge the pulsar msgs related to the bytewax message"""
-        key, content = msg
         if not self.consumer:
             raise TypeError("Client not configured as a consumer. Cannot ack the messages")
 
-        message_objects = content["msgs"]
-
-        for msg_obj in message_objects:
-            self.consumer.acknowledge(pulsar.MessageId.deserialize(msg_obj))
+        for msg in msgs:
+            self.consumer.acknowledge(pulsar.MessageId.deserialize(msg))
 
     def close(self) -> None:
         """Shutdown the connections of the client."""

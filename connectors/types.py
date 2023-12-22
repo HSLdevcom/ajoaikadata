@@ -1,8 +1,8 @@
-from typing import List, Tuple, TypedDict
+from typing import Any, List, Tuple, TypedDict
 
 
 class Msg(TypedDict):
-    data: dict
+    data: Any
 
 
 class PulsarMsg(Msg):

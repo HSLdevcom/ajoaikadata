@@ -1,5 +1,8 @@
+from copy import deepcopy
 from typing import List, Literal, TypedDict
+
 from connectors.types import PulsarMsg
+
 
 class BaliseDirectionCache(TypedDict):
     """Dict which contains information from multiple balises for direction calculation."""
@@ -18,8 +21,9 @@ def create_empty_balise_cache() -> BaliseDirectionCache:
     }
 
 
-def add_msg_to_balise_cache(balise_cache: BaliseDirectionCache, value: PulsarMsg):
-    """Add new msg to the balise."""
+def add_msg_to_balise_cache(balise_cache: BaliseDirectionCache, value: PulsarMsg) -> BaliseDirectionCache:
+    """Copy cache and add new msg to it."""
+    balise_cache = deepcopy(balise_cache)
     data = value["data"]
     balise_id = data["content"]["balise_id"]
     balise_cache["msg_refs"] += value["msgs"]
@@ -29,6 +33,7 @@ def add_msg_to_balise_cache(balise_cache: BaliseDirectionCache, value: PulsarMsg
         balise_cache["balise_id"] = balise_id
     elif balise_cache["balise_id"] != balise_id:
         raise ValueError(f"Trying to combine balises with different ids. ({balise_cache['balise_id']},{balise_id})")
+    return balise_cache
 
 
 def calculate_direction(balise_cache: BaliseDirectionCache) -> Literal[1, 2]:

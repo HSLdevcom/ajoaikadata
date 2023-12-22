@@ -69,11 +69,12 @@ class Schema:
 
         # Parse fields first
         for field in self.FIELDS:
-            fields_to_parse = field.field_names
             if self.limit_fields and self.limit_type == "include":
                 fields_to_parse = [f for f in field.field_names if f in self.limit_fields]
-            if self.limit_fields and self.limit_type == "exclude":
+            elif self.limit_fields and self.limit_type == "exclude":
                 fields_to_parse = [f for f in field.field_names if f not in self.limit_fields]
+            else:
+                fields_to_parse = field.field_names
 
             if not fields_to_parse:
                 continue
@@ -83,7 +84,7 @@ class Schema:
             try:
                 values = field.parser_function(field_content)
                 # Iterate over values and store them. Values might not be tuple, so wrap it in one if necessary
-                for f, value in zip(field.field_names, values if type(values) is tuple else (values,)):
+                for f, value in zip(field.field_names, values if isinstance(values, tuple) else (values,)):
                     if f not in fields_to_parse:
                         # Field might have been filtered
                         continue
@@ -113,11 +114,11 @@ class Schema:
                     raise TypeError(
                         "Invalid configuration. `schema_mapping` should be either a single class, or if dict, `selector_field` should be given."
                     )
-                
+
                 # If schema should be ignored, do not send any data
                 if schema and schema.ignore:
                     return None
-                
+
                 # Data content if received, otherwise empty dict
                 data = schema.parse_content(data_content) or {} if schema else {}
 

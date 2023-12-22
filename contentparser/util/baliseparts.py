@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import List, TypedDict
 
 from connectors.types import PulsarMsg
@@ -15,7 +16,9 @@ def create_empty_parts_cache() -> BalisePartsCache:
     return {"msg_refs": [], "parts": []}
 
 
-def add_msg_to_parts_cache(parts_cache: BalisePartsCache, value: PulsarMsg) -> None:
+def add_msg_to_parts_cache(parts_cache: BalisePartsCache, value: PulsarMsg) -> BalisePartsCache:
+    """Create copy of the cache and add new value"""
+    parts_cache = deepcopy(parts_cache)
     data = value["data"]
     msgs = value["msgs"]
     match data["content"]["transponder_msg_part"]:
@@ -30,6 +33,7 @@ def add_msg_to_parts_cache(parts_cache: BalisePartsCache, value: PulsarMsg) -> N
         case _:
             raise ValueError(f"Unexpected msg part index {data['content']['transponder_msg_part']}.")
     parts_cache["msg_refs"] += msgs
+    return parts_cache
 
 
 def parse_balise_msg_from_parts(parts_cache: BalisePartsCache) -> dict:
