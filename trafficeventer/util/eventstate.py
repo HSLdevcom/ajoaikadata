@@ -32,7 +32,7 @@ def create_event(data: dict, event_type: str, state: EventStateCache) -> Event:
     }
 
 
-def create_empty_state_cache() -> EventStateCache:
+def create_empty_eventstate_cache() -> EventStateCache:
     """Create a new cache."""
     return {
         "doors_open": None,
