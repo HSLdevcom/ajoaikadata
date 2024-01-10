@@ -60,12 +60,7 @@ pulsar_client = PulsarClient(input_topic)
 postgres_client = PostgresClient(SCHEMA_DETAILS["query"], SCHEMA_DETAILS["mapper"])
 
 
-def ack(data: BytewaxMsgFromPulsar):
-    key, value = data
-    pulsar_client.ack_msgs(value["msgs"])
-
-
 flow = Dataflow()
 flow.input("inp", PulsarInput(pulsar_client))
 flow.output("out", PostgresOutput(postgres_client))
-flow.inspect(ack)
+flow.inspect(pulsar_client.ack)

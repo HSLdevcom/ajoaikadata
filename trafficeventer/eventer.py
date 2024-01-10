@@ -21,16 +21,6 @@ input_client = PulsarClient(input_topic)
 output_client = PulsarClient(output_topic)
 
 
-def create_event(data, event_type, state):
-    new_data = {
-        "vehicle": data["vehicle"],
-        "eke_timestamp": data["eke_timestamp"],
-        "event_type": event_type,
-        "state": state,
-    }
-    return new_data
-
-
 def eventer(last_state: EventStateCache, value: PulsarMsg) -> Tuple[EventStateCache, PulsarMsg | None]:
     data = value["data"]
     event = None
@@ -56,11 +46,6 @@ def filter_none(data: BytewaxMsgFromPulsar):
     return data
 
 
-def ack(data: BytewaxMsgFromPulsar):
-    key, value = data
-    input_client.ack_msgs(value["msgs"])
-
-
 flow = Dataflow()
 flow.input("inp", PulsarInput(input_client))
 flow.stateful_map(
@@ -70,4 +55,4 @@ flow.stateful_map(
 )
 flow.filter_map(filter_none)
 flow.output("out", PulsarOutput(output_client))
-flow.inspect(ack)
+flow.inspect(input_client.ack)

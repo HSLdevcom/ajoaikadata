@@ -130,12 +130,6 @@ def filter_none(data: BytewaxMsgFromPulsar):
         return None
     return data
 
-
-def ack(data: BytewaxMsgFromPulsar):
-    key, value = data
-    input_client.ack_msgs(value["msgs"])
-
-
 flow = Dataflow()
 flow.input("inp", PulsarInput(input_client))
 flow.filter_map(parse_eke)
@@ -144,4 +138,4 @@ flow.filter_map(filter_none)
 flow.stateful_map("balise_direction", lambda: create_empty_balise_cache(), create_directions_for_balises)
 flow.filter_map(filter_none)
 flow.output("out", PulsarOutput(output_client))
-flow.inspect(ack)
+flow.inspect(input_client.ack)

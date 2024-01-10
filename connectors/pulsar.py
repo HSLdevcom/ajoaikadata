@@ -51,6 +51,11 @@ class PulsarClient:
         for msg in msgs:
             self.consumer.acknowledge(pulsar.MessageId.deserialize(msg))
 
+    def ack(self, data: BytewaxMsgFromPulsar):
+        """Ack all related pulsar messages from a bytewax message."""
+        key, value = data
+        self.ack_msgs(value["msgs"])
+
     def close(self) -> None:
         """Shutdown the connections of the client."""
         self.client.close()
