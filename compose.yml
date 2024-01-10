@@ -10,7 +10,7 @@ services:
       - SUBSCRIPTION_NAME=reader # not used
       - OUTPUT_TOPIC=raw
     volumes:
-      - ./reader:/bytewax/app
+      - ./apps/reader:/bytewax/app
       - ./data:/data
       - ./connectors:/bytewax/connectors
     depends_on:
@@ -26,29 +26,29 @@ services:
   contentparser:
     build: .
     environment:
-      - BYTEWAX_PYTHON_FILE_PATH=app.modifier:flow
+      - BYTEWAX_PYTHON_FILE_PATH=app.contentparser:flow
       - BYTEWAX_PYTHON_PARAMETERS=-p 3 -w 2
       - INPUT_TOPIC=raw
       - SUBSCRIPTION_NAME=contentparser
       - OUTPUT_TOPIC=parsed
     volumes:
-      - ./contentparser:/bytewax/app
+      - ./apps/contentparser:/bytewax/app
       - ./connectors:/bytewax/connectors
       - ./ekeparser:/bytewax/ekeparser
     depends_on:
       pulsar:
         condition: service_healthy
 
-  trafficeventer:
+  eventcreator:
     build: .
     environment:
-      - BYTEWAX_PYTHON_FILE_PATH=app.eventer:flow
+      - BYTEWAX_PYTHON_FILE_PATH=app.eventcreator:flow
       - BYTEWAX_PYTHON_PARAMETERS=-p 2 -w 2
       - INPUT_TOPIC=parsed
-      - SUBSCRIPTION_NAME=trafficeventer
+      - SUBSCRIPTION_NAME=eventcreator
       - OUTPUT_TOPIC=events
     volumes:
-      - ./trafficeventer:/bytewax/app
+      - ./apps/eventcreator:/bytewax/app
       - ./connectors:/bytewax/connectors
     depends_on:
       pulsar:
@@ -57,14 +57,14 @@ services:
   messagesink:
     build: .
     environment:
-      - BYTEWAX_PYTHON_FILE_PATH=app.postgres:flow
+      - BYTEWAX_PYTHON_FILE_PATH=app.pgsink:flow
       - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 2
       - INPUT_TOPIC=parsed
       - SUBSCRIPTION_NAME=messagesink
       - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres
       - SINK_SCHEMA=MESSAGES
     volumes:
-      - ./sink:/bytewax/app
+      - ./apps/pgsink:/bytewax/app
       - ./connectors:/bytewax/connectors
     depends_on:
       pulsar:
@@ -75,14 +75,14 @@ services:
   eventsink:
     build: .
     environment:
-      - BYTEWAX_PYTHON_FILE_PATH=app.postgres:flow
+      - BYTEWAX_PYTHON_FILE_PATH=app.pgsink:flow
       - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 2
       - INPUT_TOPIC=events
       - SUBSCRIPTION_NAME=messagesink
       - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres
       - SINK_SCHEMA=EVENTS
     volumes:
-      - ./sink:/bytewax/app
+      - ./apps/pgsink:/bytewax/app
       - ./connectors:/bytewax/connectors
     depends_on:
       pulsar:
