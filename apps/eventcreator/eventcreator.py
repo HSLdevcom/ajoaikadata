@@ -60,7 +60,7 @@ def station_combiner(last_state: StationStateCache, value: PulsarMsg) -> Tuple[S
 
     match data["event_type"]:
         case "ARRIVAL":
-            if not any(last_state.values()):
+            if any(last_state.values()):
                 station_event_to_send = create_station_event(data, last_state)
                 last_state = create_empty_stationstate_cache()
 
@@ -68,12 +68,14 @@ def station_combiner(last_state: StationStateCache, value: PulsarMsg) -> Tuple[S
             new_state["track"] = data["state"]["last_station_event"]["track"]
 
         case "stopped":
-            new_state["time_arrived"] = data["eke_timestamp"]
+            if not last_state.get("time_arrived"):
+                new_state["time_arrived"] = data["eke_timestamp"]
 
         case "doors_opened":
             pass
 
         case "doors_closed":
+            # update also the existing value, because we want to get the last one
             new_state["time_doors_last_closed"] = data["eke_timestamp"]
 
         case "moving":

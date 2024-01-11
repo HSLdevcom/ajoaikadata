@@ -40,7 +40,7 @@ PG_SCHEMA = {
             "timestamp": data_obj["eke_timestamp"],
             "event_type": data_obj["event_type"],
             "vehicle_id": data_obj["vehicle"],
-            "state": json.dumps(data_obj),
+            "state": json.dumps(data_obj["state"]),
         },
     },
 }

@@ -11,8 +11,9 @@ services:
       - OUTPUT_TOPIC=raw
     volumes:
       - ./apps/reader:/bytewax/app
-      - ./data:/data
       - ./connectors:/bytewax/connectors
+      - ./config.py:/bytewax/config.py
+      - ./data:/data
     depends_on:
       pulsar:
         condition: service_healthy
@@ -27,7 +28,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.contentparser:flow
-      - BYTEWAX_PYTHON_PARAMETERS=-p 3 -w 2
+      - BYTEWAX_PYTHON_PARAMETERS=-p 2 -w 2
       - INPUT_TOPIC=raw
       - SUBSCRIPTION_NAME=contentparser
       - OUTPUT_TOPIC=parsed
