@@ -1,4 +1,6 @@
 from typing import Tuple
+
+import bytewax.operators as op
 from bytewax.dataflow import Dataflow
 
 from connectors.pulsar import PulsarInput, PulsarOutput, PulsarClient
@@ -112,19 +114,23 @@ def create_directions_for_balises(
     return add_msg_to_balise_cache(create_empty_balise_cache(), value), msg_to_send
 
 
-def filter_none(data: BytewaxMsgFromPulsar):
+def filter_none(data):  # TODO: Add typing
     key, msg = data
     if not msg:
         return None
     return data
 
 
-flow = Dataflow()
-flow.input("inp", PulsarInput(input_client))
-flow.filter_map(parse_eke)
-flow.stateful_map("balise_parts", lambda: create_empty_parts_cache(), combine_balise_parts)
-flow.filter_map(filter_none)
-flow.stateful_map("balise_direction", lambda: create_empty_balise_cache(), create_directions_for_balises)
-flow.filter_map(filter_none)
-flow.output("out", PulsarOutput(output_client))
-flow.inspect(input_client.ack)
+flow = Dataflow("contentparser")
+stream = op.input("contentparser_in", flow, PulsarInput(input_client))
+eke_stream = op.filter_map("parse_eke", stream, parse_eke)
+eke_stream_with_balises = op.stateful_map(
+    "combine_balises", eke_stream, lambda: create_empty_parts_cache(), combine_balise_parts
+)
+eke_stream_with_balises = op.filter_map("combine_balises_filtered", eke_stream_with_balises, filter_none)
+eke_stream_with_balises_dirs = op.stateful_map(
+    "balise_direction", eke_stream_with_balises, lambda: create_empty_balise_cache(), create_directions_for_balises
+)
+eke_stream_with_balises_dirs = op.filter_map("balise_direction_filtered", eke_stream_with_balises_dirs, filter_none)
+op.output("contentparser_out", eke_stream_with_balises_dirs, PulsarOutput(output_client))
+op.inspect("contentparser_ack", eke_stream_with_balises_dirs, input_client.ack)

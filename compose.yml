@@ -6,7 +6,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.reader:flow
-      - BYTEWAX_PYTHON_PARAMETERS=-p 2 -w 2
+      - BYTEWAX_PYTHON_PARAMETERS=-w 6
       - PULSAR_CLIENT_NAME=reader
       - PULSAR_OUTPUT_TOPIC=raw
     volumes:
@@ -28,7 +28,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.contentparser:flow
-      - BYTEWAX_PYTHON_PARAMETERS=-p 2 -w 2
+      - BYTEWAX_PYTHON_PARAMETERS=-w 10
       - PULSAR_CLIENT_NAME=contentparser
       - PULSAR_INPUT_TOPIC=raw
       - PULSAR_OUTPUT_TOPIC=parsed
@@ -45,7 +45,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.eventcreator:flow
-      - BYTEWAX_PYTHON_PARAMETERS=-p 2 -w 2
+      - BYTEWAX_PYTHON_PARAMETERS=-w 1
       - PULSAR_CLIENT_NAME=eventcreator
       - PULSAR_INPUT_TOPIC=parsed
       - PULSAR_OUTPUT_TOPIC=events
@@ -61,7 +61,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.pgsink:flow
-      - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 2
+      - BYTEWAX_PYTHON_PARAMETERS=-w 1
       - PULSAR_CLIENT_NAME=messagesink
       - PULSAR_INPUT_TOPIC=parsed
       - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres
@@ -80,7 +80,7 @@ services:
     build: .
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.pgsink:flow
-      - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 2
+      - BYTEWAX_PYTHON_PARAMETERS=-w 1
       - PULSAR_CLIENT_NAME=eventsink
       - PULSAR_INPUT_TOPIC=events
       - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres

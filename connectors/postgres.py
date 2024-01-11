@@ -1,7 +1,7 @@
 from typing import Callable, List, TypedDict
 from datetime import datetime
 
-from bytewax.outputs import DynamicOutput, StatelessSink
+from bytewax.outputs import DynamicSink, StatelessSinkPartition
 from psycopg import sql
 import psycopg_pool
 
@@ -45,7 +45,7 @@ class PostgresClient:
         self.pool.close()
 
 
-class PostgresSink(StatelessSink):
+class PostgresSink(StatelessSinkPartition):
     def __init__(self, client: PostgresClient) -> None:
         self.client = client
 
@@ -56,7 +56,7 @@ class PostgresSink(StatelessSink):
         self.client.close()
 
 
-class PostgresOutput(DynamicOutput):
+class PostgresOutput(DynamicSink):
     def __init__(self, client: PostgresClient) -> None:
         super().__init__()
         self.client = client

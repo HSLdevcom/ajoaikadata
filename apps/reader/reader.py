@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import bytewax.operators as op
 from bytewax.dataflow import Dataflow
 
 from connectors.pulsar import PulsarOutput, PulsarClient
@@ -20,7 +21,7 @@ def create_pulsar_msg(value) -> BytewaxMsgFromCSV:
     return vehicle, {"data": data}
 
 
-flow = Dataflow()
-flow.input("inp", CSVDirInput(Path("/data/"))) # TODO: Configure
-flow.map(create_pulsar_msg)
-flow.output("out", PulsarOutput(output_client))
+flow = Dataflow("reader")
+stream = op.input("reader_in", flow, CSVDirInput(Path("/data/"))) # TODO: Configure path
+pulsar_msg_stream = op.map("create_pulsar_msg", stream, create_pulsar_msg)
+op.output("reader_out", pulsar_msg_stream, PulsarOutput(output_client))

@@ -3,7 +3,7 @@ import gzip
 from pathlib import Path
 from typing import Any
 
-from bytewax.inputs import PartitionedInput, StatefulSource, batch
+from bytewax.inputs import FixedPartitionedSource, StatefulSourcePartition, batch
 
 from config import logger
 
@@ -36,7 +36,7 @@ def _readlines(files):
         f.close()
 
 
-class CSVDirSource(StatefulSource):
+class CSVDirSource(StatefulSourcePartition):
     def __init__(self, path, pattern, batch_size, fmtparams):
         # list all files in the directory, filter by pattern and sort
         # supports both csv and gzipped csv
@@ -57,7 +57,7 @@ class CSVDirSource(StatefulSource):
         )
         self._batcher = batch(self.reader, batch_size)
 
-    def next_batch(self):
+    def next_batch(self, sched):
         return next(self._batcher)
 
     def snapshot(self) -> Any:
@@ -67,7 +67,7 @@ class CSVDirSource(StatefulSource):
         del self.reader
 
 
-class CSVDirInput(PartitionedInput):
+class CSVDirInput(FixedPartitionedSource):
     def __init__(self, path: Path, batch_size: int = 1000, **fmtparams):
         if not isinstance(path, Path):
             path = Path(path)
@@ -80,5 +80,5 @@ class CSVDirInput(PartitionedInput):
         """Each partition is a vehicle id. TODO: make this configurable."""
         return [str(i) for i in range(1, 101)]
 
-    def build_part(self, for_part, resume_state):
+    def build_part(self, now, for_part, resume_state):
         return CSVDirSource(self._path, for_part, self._batch_size, self._fmtparams)

@@ -2,16 +2,16 @@ from datetime import datetime
 import json
 from typing import List
 
-from bytewax.outputs import DynamicOutput, StatelessSink
-from bytewax.inputs import DynamicInput, StatelessSource
+from bytewax.outputs import DynamicSink, StatelessSinkPartition
+from bytewax.inputs import DynamicSource, StatelessSourcePartition
 
 import pulsar
 
 from .types import BytewaxMsgFromPulsar
 
-import config
+from config import read_from_env
 
-PULSAR_CONN_STR, PULSAR_CLIENT_NAME = config.read_from_env(
+PULSAR_CONN_STR, PULSAR_CLIENT_NAME = read_from_env(
     ("PULSAR_CONN_STR", "PULSAR_CLIENT_NAME"), defaults=("pulsar://pulsar:6650",)
 )
 
@@ -51,7 +51,7 @@ class PulsarClient:
         for msg in msgs:
             self.consumer.acknowledge(pulsar.MessageId.deserialize(msg))
 
-    def ack(self, data: BytewaxMsgFromPulsar):
+    def ack(self, inspector, data): # TODO: Typing
         """Ack all related pulsar messages from a bytewax message."""
         key, value = data
         self.ack_msgs(value["msgs"])
@@ -61,7 +61,7 @@ class PulsarClient:
         self.client.close()
 
 
-class PulsarSource(StatelessSource):
+class PulsarSource(StatelessSourcePartition):
     def __init__(self, client: PulsarClient, worker_index: int):
         self.client = client
         self.consumer = self.client.get_consumer(worker_index)
@@ -69,7 +69,7 @@ class PulsarSource(StatelessSource):
     def next_awake(self) -> datetime | None:
         return None
 
-    def next_batch(self) -> List[BytewaxMsgFromPulsar]:
+    def next_batch(self, sched) -> List[BytewaxMsgFromPulsar]:
         msgs: List[pulsar.Message] = self.consumer.batch_receive()
         return [
             (
@@ -83,16 +83,16 @@ class PulsarSource(StatelessSource):
         self.consumer.close()
 
 
-class PulsarInput(DynamicInput):
+class PulsarInput(DynamicSource):
     def __init__(self, client: PulsarClient) -> None:
         super().__init__()
         self.client = client
 
-    def build(self, worker_index: int, worker_count: int):
+    def build(self, now, worker_index: int, worker_count: int):
         return PulsarSource(self.client, worker_index)
 
 
-class PulsarSink(StatelessSink):
+class PulsarSink(StatelessSinkPartition):
     def __init__(self, client: PulsarClient, worker_index: int):
         self.client = client
         self.producer = self.client.get_producer(worker_index)
@@ -108,7 +108,7 @@ class PulsarSink(StatelessSink):
         self.producer.close()
 
 
-class PulsarOutput(DynamicOutput):
+class PulsarOutput(DynamicSink):
     def __init__(self, client: PulsarClient) -> None:
         super().__init__()
         self.client = client

@@ -1,5 +1,6 @@
 import json
 
+import bytewax.operators as op
 from bytewax.dataflow import Dataflow
 
 from psycopg import sql
@@ -51,7 +52,7 @@ pulsar_client = PulsarClient(input_topic)
 postgres_client = PostgresClient(schema_details["query"], schema_details["mapper"])
 
 
-flow = Dataflow()
-flow.input("inp", PulsarInput(pulsar_client))
-flow.output("out", PostgresOutput(postgres_client))
-flow.inspect(pulsar_client.ack)
+flow = Dataflow("pgsink")
+stream = op.input("pgsink_in", flow, PulsarInput(pulsar_client))
+op.output("pgsink_out", stream, PostgresOutput(postgres_client))
+op.inspect("pgsink_ack", stream, pulsar_client.ack)
