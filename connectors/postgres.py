@@ -1,5 +1,3 @@
-import json
-import os
 from typing import Callable, List, TypedDict
 from datetime import datetime
 
@@ -9,10 +7,9 @@ import psycopg_pool
 
 from .types import BytewaxMsgFromPulsar
 
-# get postgres connection str from env, if not set, raise error
-POSTGRES_CONN_STR: str = os.environ.get("POSTGRES_CONN_STR", "")
-if not POSTGRES_CONN_STR:
-    raise ValueError("POSTGRES_CONN_STR not set")
+from config import read_from_env
+
+(POSTGRES_CONN_STR,) = read_from_env(("POSTGRES_CONN_STR",))
 
 
 class EkeMessageRow(TypedDict):

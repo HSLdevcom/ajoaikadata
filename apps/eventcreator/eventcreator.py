@@ -1,4 +1,3 @@
-from copy import deepcopy
 import os
 from typing import Tuple
 
@@ -16,14 +15,9 @@ from .util.eventstate import (
 )
 from .util.stationstate import StationStateCache, create_empty_stationstate_cache, create_station_event
 
-# read topic names from env
-input_topic = os.environ.get("INPUT_TOPIC")
-if not input_topic:
-    raise ValueError("INPUT_TOPIC not set")
+from config import read_from_env
 
-output_topic = os.environ.get("OUTPUT_TOPIC")
-if not output_topic:
-    raise ValueError("OUTPUT_TOPIC not set")
+input_topic, output_topic = read_from_env(("PULSAR_INPUT_TOPIC", "PULSAR_OUTPUT_TOPIC"))
 
 input_client = PulsarClient(input_topic)
 output_client = PulsarClient(output_topic)

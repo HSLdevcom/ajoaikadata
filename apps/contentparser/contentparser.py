@@ -1,4 +1,3 @@
-import os
 from typing import Tuple
 from bytewax.dataflow import Dataflow
 
@@ -20,21 +19,10 @@ from .util.baliseparts import (
     add_msg_to_parts_cache,
     parse_balise_msg_from_parts,
 )
-import logging
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from config import logger, read_from_env
 
-
-# read topic names from env
-input_topic = os.environ.get("INPUT_TOPIC")
-output_topic = os.environ.get("OUTPUT_TOPIC")
-
-# test if input_topic and output_topic are set  (if not, raise error)
-if not input_topic:
-    raise ValueError("INPUT_TOPIC not set")
-if not output_topic:
-    raise ValueError("OUTPUT_TOPIC not set")
+input_topic, output_topic = read_from_env(("PULSAR_INPUT_TOPIC", "PULSAR_OUTPUT_TOPIC"))
 
 input_client = PulsarClient(input_topic)
 output_client = PulsarClient(output_topic)
@@ -129,6 +117,7 @@ def filter_none(data: BytewaxMsgFromPulsar):
     if not msg:
         return None
     return data
+
 
 flow = Dataflow()
 flow.input("inp", PulsarInput(input_client))

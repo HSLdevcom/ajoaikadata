@@ -1,14 +1,13 @@
 import json
-import os
 
 from bytewax.dataflow import Dataflow
-from bytewax.connectors.stdio import StdOutput
 
 from psycopg import sql
 
 from connectors.pulsar import PulsarInput, PulsarClient
 from connectors.postgres import PostgresOutput, PostgresClient
-from connectors.types import BytewaxMsgFromPulsar
+
+from config import read_from_env
 
 PG_SCHEMA = {
     "MESSAGES": {
@@ -45,19 +44,11 @@ PG_SCHEMA = {
     },
 }
 
-# read topic names from env
-input_topic = os.environ.get("INPUT_TOPIC")
-if not input_topic:
-    raise ValueError("INPUT_TOPIC not set")
-
-SINK_SCHEMA = os.environ.get("SINK_SCHEMA")
-if not SINK_SCHEMA:
-    raise ValueError("SINK_SCHEMA not set")
-SCHEMA_DETAILS = PG_SCHEMA[SINK_SCHEMA]
+input_topic, sink_schema = read_from_env(("PULSAR_INPUT_TOPIC", "POSTGRES_SINK_SCHEMA"))
+schema_details = PG_SCHEMA[sink_schema]
 
 pulsar_client = PulsarClient(input_topic)
-
-postgres_client = PostgresClient(SCHEMA_DETAILS["query"], SCHEMA_DETAILS["mapper"])
+postgres_client = PostgresClient(schema_details["query"], schema_details["mapper"])
 
 
 flow = Dataflow()

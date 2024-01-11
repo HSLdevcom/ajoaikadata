@@ -7,12 +7,12 @@ services:
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.reader:flow
       - BYTEWAX_PYTHON_PARAMETERS=-p 2 -w 2
-      - SUBSCRIPTION_NAME=reader # not used
-      - OUTPUT_TOPIC=raw
+      - PULSAR_CLIENT_NAME=reader
+      - PULSAR_OUTPUT_TOPIC=raw
     volumes:
+      - ./config.py:/bytewax/config.py
       - ./apps/reader:/bytewax/app
       - ./connectors:/bytewax/connectors
-      - ./config.py:/bytewax/config.py
       - ./data:/data
     depends_on:
       pulsar:
@@ -29,10 +29,11 @@ services:
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.contentparser:flow
       - BYTEWAX_PYTHON_PARAMETERS=-p 2 -w 2
-      - INPUT_TOPIC=raw
-      - SUBSCRIPTION_NAME=contentparser
-      - OUTPUT_TOPIC=parsed
+      - PULSAR_CLIENT_NAME=contentparser
+      - PULSAR_INPUT_TOPIC=raw
+      - PULSAR_OUTPUT_TOPIC=parsed
     volumes:
+      - ./config.py:/bytewax/config.py
       - ./apps/contentparser:/bytewax/app
       - ./connectors:/bytewax/connectors
       - ./ekeparser:/bytewax/ekeparser
@@ -45,10 +46,11 @@ services:
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.eventcreator:flow
       - BYTEWAX_PYTHON_PARAMETERS=-p 2 -w 2
-      - INPUT_TOPIC=parsed
-      - SUBSCRIPTION_NAME=eventcreator
-      - OUTPUT_TOPIC=events
+      - PULSAR_CLIENT_NAME=eventcreator
+      - PULSAR_INPUT_TOPIC=parsed
+      - PULSAR_OUTPUT_TOPIC=events
     volumes:
+      - ./config.py:/bytewax/config.py
       - ./apps/eventcreator:/bytewax/app
       - ./connectors:/bytewax/connectors
     depends_on:
@@ -60,11 +62,12 @@ services:
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.pgsink:flow
       - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 2
-      - INPUT_TOPIC=parsed
-      - SUBSCRIPTION_NAME=messagesink
+      - PULSAR_CLIENT_NAME=messagesink
+      - PULSAR_INPUT_TOPIC=parsed
       - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres
-      - SINK_SCHEMA=MESSAGES
+      - POSTGRES_SINK_SCHEMA=MESSAGES
     volumes:
+      - ./config.py:/bytewax/config.py
       - ./apps/pgsink:/bytewax/app
       - ./connectors:/bytewax/connectors
     depends_on:
@@ -78,11 +81,12 @@ services:
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.pgsink:flow
       - BYTEWAX_PYTHON_PARAMETERS=-p 1 -w 2
-      - INPUT_TOPIC=events
-      - SUBSCRIPTION_NAME=messagesink
+      - PULSAR_CLIENT_NAME=eventsink
+      - PULSAR_INPUT_TOPIC=events
       - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres
-      - SINK_SCHEMA=EVENTS
+      - POSTGRES_SINK_SCHEMA=EVENTS
     volumes:
+      - ./config.py:/bytewax/config.py
       - ./apps/pgsink:/bytewax/app
       - ./connectors:/bytewax/connectors
     depends_on:

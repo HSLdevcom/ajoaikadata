@@ -5,11 +5,7 @@ from typing import Any
 
 from bytewax.inputs import PartitionedInput, StatefulSource, batch
 
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
+from config import logger
 
 def _readlines(files):
     """Turn a list of files into a generator of lines but support `tell`.

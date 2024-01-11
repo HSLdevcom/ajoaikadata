@@ -1,6 +1,5 @@
 from datetime import datetime
 import json
-import os
 from typing import List
 
 from bytewax.outputs import DynamicOutput, StatelessSink
@@ -10,15 +9,16 @@ import pulsar
 
 from .types import BytewaxMsgFromPulsar
 
-# get subscription name from env, if not set, raise error
-subscription_name = os.environ.get("SUBSCRIPTION_NAME")
-if not subscription_name:
-    raise ValueError("SUBSCRIPTION_NAME not set")
+import config
+
+PULSAR_CONN_STR, PULSAR_CLIENT_NAME = config.read_from_env(
+    ("PULSAR_CONN_STR", "PULSAR_CLIENT_NAME"), defaults=("pulsar://pulsar:6650",)
+)
 
 
 class PulsarClient:
     def __init__(self, topic_name: str) -> None:
-        self.client = pulsar.Client("pulsar://pulsar:6650")
+        self.client = pulsar.Client(PULSAR_CONN_STR)
         self.topic_name = topic_name
         self.producer: pulsar.Producer | None = None
         self.consumer: pulsar.Consumer | None = None
@@ -28,8 +28,8 @@ class PulsarClient:
         if not self.consumer:
             self.consumer = self.client.subscribe(
                 self.topic_name,
-                subscription_name=subscription_name,
-                consumer_name=f"{subscription_name}-{worker_index}",
+                subscription_name=PULSAR_CLIENT_NAME,
+                consumer_name=f"{PULSAR_CLIENT_NAME}-{worker_index}",
                 consumer_type=pulsar.ConsumerType.KeyShared,
             )
 
@@ -39,7 +39,7 @@ class PulsarClient:
         """Get the pulsar producer. If not already initialized, create one for the configured topic."""
         if not self.producer:
             self.producer = self.client.create_producer(
-                self.topic_name, producer_name=f"{subscription_name}-{worker_index}"
+                self.topic_name, producer_name=f"{PULSAR_CLIENT_NAME}-{worker_index}"
             )
         return self.producer
 
