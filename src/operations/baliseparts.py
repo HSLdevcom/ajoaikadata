@@ -1,8 +1,11 @@
 from copy import deepcopy
-from typing import List, TypedDict
+from typing import List, Tuple, TypedDict
 
-from ...types import AjoaikadataMsg
-from ...ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
+from ..types import AjoaikadataMsg, create_empty_msg
+from ..ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
+
+from ..config import logger
+
 
 BEACON_DATA_SCHEMA = JKVBeaconDataSchema()
 
@@ -55,3 +58,33 @@ def parse_balise_msg_from_parts(parts_cache: BalisePartsCache) -> dict:
     data_obj["content"].update(data)
 
     return data_obj
+
+
+def combine_balise_parts(
+    parts_cache: BalisePartsCache, value: AjoaikadataMsg
+) -> Tuple[BalisePartsCache, AjoaikadataMsg]:
+    data = value["data"]
+
+    # No balise message, skip
+    if data["msg_type"] != 5:
+        return parts_cache, value
+
+    try:
+        match data["content"]["transponder_msg_part"]:
+            case 0:
+                return add_msg_to_parts_cache(parts_cache, value), create_empty_msg()
+            case 1:
+                parts_cache = add_msg_to_parts_cache(parts_cache, value)
+                try:
+                    parsed_msg = parse_balise_msg_from_parts(parts_cache)
+                    msg_to_send: AjoaikadataMsg = {"msgs": parts_cache["msg_refs"], "data": parsed_msg}
+                except ValueError:
+                    msg_to_send = create_empty_msg()
+                return create_empty_parts_cache(), msg_to_send
+            case _:
+                raise ValueError("Unexpected msg part index.")
+    except ValueError as e:
+        logger.error(e)
+        msg: AjoaikadataMsg = {"data": None, "msgs": parts_cache["msg_refs"]}
+
+        return create_empty_parts_cache(), msg

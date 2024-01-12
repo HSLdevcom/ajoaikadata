@@ -8,12 +8,11 @@ from .connectors.pulsar import PulsarInput, PulsarOutput, PulsarClient
 
 from .ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
 
-from .operations.util.balisedirection import create_empty_balise_cache
-from .operations.util.baliseparts import create_empty_parts_cache
+from .operations.balisedirection import create_directions_for_balises, create_empty_balise_cache
+from .operations.baliseparts import combine_balise_parts, create_empty_parts_cache
 
-from .operations.balises import combine_balise_parts, create_directions_for_balises
 from .operations.parsing import raw_msg_to_eke
-from .config import logger, read_from_env
+from .config import read_from_env
 
 input_topic, output_topic = read_from_env(("PULSAR_INPUT_TOPIC", "PULSAR_OUTPUT_TOPIC"))
 
