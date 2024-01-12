@@ -1,10 +1,10 @@
 from copy import deepcopy
 from typing import List, Tuple, TypedDict
 
-from ..types import AjoaikadataMsg, create_empty_msg
+from ..util.types import AjoaikadataMsg, create_empty_msg
 from ..ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
 
-from ..config import logger
+from ..util.config import logger
 
 
 BEACON_DATA_SCHEMA = JKVBeaconDataSchema()

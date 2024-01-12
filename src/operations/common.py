@@ -1,4 +1,4 @@
-from ..types import AjoaikadataMsgWithKey
+from ..util.types import AjoaikadataMsgWithKey
 
 def filter_none(data: AjoaikadataMsgWithKey) -> AjoaikadataMsgWithKey | None:
     key, msg = data

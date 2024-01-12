@@ -5,7 +5,7 @@ from typing import Any
 
 from bytewax.inputs import FixedPartitionedSource, StatefulSourcePartition, batch
 
-from ..config import logger
+from ..util.config import logger
 
 def _readlines(files):
     """Turn a list of files into a generator of lines but support `tell`.

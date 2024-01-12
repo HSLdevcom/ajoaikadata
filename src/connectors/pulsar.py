@@ -7,9 +7,9 @@ from bytewax.inputs import DynamicSource, StatelessSourcePartition
 
 import pulsar
 
-from ..types import AjoaikadataMsgWithKey
+from ..util.types import AjoaikadataMsgWithKey
 
-from ..config import read_from_env
+from ..util.config import read_from_env
 
 PULSAR_CONN_STR, PULSAR_CLIENT_NAME = read_from_env(
     ("PULSAR_CONN_STR", "PULSAR_CLIENT_NAME"), defaults=("pulsar://pulsar:6650",)

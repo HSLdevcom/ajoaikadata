@@ -5,9 +5,9 @@ from bytewax.outputs import DynamicSink, StatelessSinkPartition
 from psycopg import sql
 import psycopg_pool
 
-from ..types import AjoaikadataMsgWithKey
+from ..util.types import AjoaikadataMsgWithKey
 
-from ..config import read_from_env
+from ..util.config import read_from_env
 
 (POSTGRES_CONN_STR,) = read_from_env(("POSTGRES_CONN_STR",))
 

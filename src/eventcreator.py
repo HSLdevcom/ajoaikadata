@@ -7,7 +7,7 @@ from .operations.common import filter_none
 from .operations.events import event_creator, create_empty_eventstate_cache
 from .operations.stationevents import station_event_creator, create_empty_stationstate_cache
 
-from .config import read_from_env
+from .util.config import read_from_env
 
 input_topic, output_topic = read_from_env(("PULSAR_INPUT_TOPIC", "PULSAR_OUTPUT_TOPIC"))
 

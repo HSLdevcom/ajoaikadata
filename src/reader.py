@@ -12,7 +12,7 @@ from .connectors.csv_directory import CSVDirInput
 
 from .operations.parsing import csv_to_bytewax_msg
 
-from .config import read_from_env
+from .util.config import read_from_env
 
 (output_topic,) = read_from_env(("PULSAR_OUTPUT_TOPIC",))
 output_client = PulsarClient(output_topic)

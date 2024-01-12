@@ -1,7 +1,7 @@
-from ..types import AjoaikadataMsgWithKey
 from ..ekeparser.ekeparser import parse_eke_data
+from ..util.types import AjoaikadataMsgWithKey
 
-from ..config import logger
+from ..util.config import logger
 
 
 def csv_to_bytewax_msg(value) -> AjoaikadataMsgWithKey:

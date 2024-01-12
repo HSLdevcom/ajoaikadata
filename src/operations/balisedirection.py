@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import List, Literal, Tuple, TypedDict
 
-from ..types import AjoaikadataMsg, create_empty_msg
+from ..util.types import AjoaikadataMsg, create_empty_msg
 
 
 class BaliseDirectionCache(TypedDict):

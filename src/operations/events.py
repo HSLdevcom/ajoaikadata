@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import Any, Tuple, TypedDict
 
-from ..types import AjoaikadataMsg
+from ..util.types import AjoaikadataMsg
 from ..util.balise_registry import balise_registry
 
 
