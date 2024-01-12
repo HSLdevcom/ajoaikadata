@@ -9,10 +9,10 @@ from bytewax.dataflow import Dataflow
 
 from psycopg import sql
 
-from ..connectors.pulsar import PulsarInput, PulsarClient
-from ..connectors.postgres import PostgresOutput, PostgresClient
+from .connectors.pulsar import PulsarInput, PulsarClient
+from .connectors.postgres import PostgresOutput, PostgresClient
 
-from ..config import read_from_env
+from .config import read_from_env
 
 PG_SCHEMA = {
     "MESSAGES": {

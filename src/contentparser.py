@@ -6,26 +6,26 @@ from typing import Tuple
 import bytewax.operators as op
 from bytewax.dataflow import Dataflow
 
-from ..connectors.pulsar import PulsarInput, PulsarOutput, PulsarClient
-from ..connectors.types import BytewaxMsgFromPulsar, PulsarMsg
-from ..ekeparser.ekeparser import parse_eke_data
+from .connectors.pulsar import PulsarInput, PulsarOutput, PulsarClient
+from .connectors.types import BytewaxMsgFromPulsar, PulsarMsg
+from .ekeparser.ekeparser import parse_eke_data
 
-from ..ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
+from .ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
 
-from .util.balisedirection import (
+from .subflows.util.balisedirection import (
     BaliseDirectionCache,
     create_empty_balise_cache,
     add_msg_to_balise_cache,
     calculate_direction,
 )
-from .util.baliseparts import (
+from .subflows.util.baliseparts import (
     BalisePartsCache,
     create_empty_parts_cache,
     add_msg_to_parts_cache,
     parse_balise_msg_from_parts,
 )
 
-from ..config import logger, read_from_env
+from .config import logger, read_from_env
 
 input_topic, output_topic = read_from_env(("PULSAR_INPUT_TOPIC", "PULSAR_OUTPUT_TOPIC"))
 
