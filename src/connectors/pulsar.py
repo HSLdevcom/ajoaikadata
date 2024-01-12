@@ -7,7 +7,7 @@ from bytewax.inputs import DynamicSource, StatelessSourcePartition
 
 import pulsar
 
-from .types import BytewaxMsgFromPulsar
+from ..types import AjoaikadataMsgWithKey
 
 from ..config import read_from_env
 
@@ -51,10 +51,19 @@ class PulsarClient:
         for msg in msgs:
             self.consumer.acknowledge(pulsar.MessageId.deserialize(msg))
 
-    def ack(self, inspector, data): # TODO: Typing
+    def ack(self, inspector, data: AjoaikadataMsgWithKey):  # TODO: Typing
         """Ack all related pulsar messages from a bytewax message."""
         key, value = data
-        self.ack_msgs(value["msgs"])
+        msgs = value.get("msgs")
+        if msgs:
+            self.ack_msgs(msgs)
+
+    def ack_filter_none(self, data: AjoaikadataMsgWithKey) -> AjoaikadataMsgWithKey | None:
+        key, msg = data
+        if not msg.get("data"):
+            self.ack_msgs(msg.get("msgs", []))
+            return None
+        return data
 
     def close(self) -> None:
         """Shutdown the connections of the client."""
@@ -69,7 +78,7 @@ class PulsarSource(StatelessSourcePartition):
     def next_awake(self) -> datetime | None:
         return None
 
-    def next_batch(self, sched) -> List[BytewaxMsgFromPulsar]:
+    def next_batch(self, sched) -> List[AjoaikadataMsgWithKey]:
         msgs: List[pulsar.Message] = self.consumer.batch_receive()
         return [
             (

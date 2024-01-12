@@ -5,7 +5,7 @@ from bytewax.outputs import DynamicSink, StatelessSinkPartition
 from psycopg import sql
 import psycopg_pool
 
-from .types import BytewaxMsgFromPulsar
+from ..types import AjoaikadataMsgWithKey
 
 from ..config import read_from_env
 
@@ -25,7 +25,7 @@ class PostgresClient:
         self.query = query
         self.mapper = mapper
 
-    def insert(self, data: List[BytewaxMsgFromPulsar]) -> None:
+    def insert(self, data: List[AjoaikadataMsgWithKey]) -> None:
         rows = []
         for msg in data:
             key, content = msg
@@ -49,7 +49,7 @@ class PostgresSink(StatelessSinkPartition):
     def __init__(self, client: PostgresClient) -> None:
         self.client = client
 
-    def write_batch(self, data: List[BytewaxMsgFromPulsar]):
+    def write_batch(self, data: List[AjoaikadataMsgWithKey]):
         self.client.insert(data)
 
     def close(self):

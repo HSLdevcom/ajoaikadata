@@ -1,13 +1,13 @@
 from copy import deepcopy
 from typing import List, Literal, TypedDict
 
-from ...connectors.types import PulsarMsg
+from ...types import AjoaikadataMsg
 
 
 class BaliseDirectionCache(TypedDict):
     """Dict which contains information from multiple balises for direction calculation."""
 
-    msg_refs: List
+    msg_refs: List[str]
     balises: List[dict]
     balise_id: str | None
 
@@ -21,12 +21,13 @@ def create_empty_balise_cache() -> BaliseDirectionCache:
     }
 
 
-def add_msg_to_balise_cache(balise_cache: BaliseDirectionCache, value: PulsarMsg) -> BaliseDirectionCache:
+def add_msg_to_balise_cache(balise_cache: BaliseDirectionCache, value: AjoaikadataMsg) -> BaliseDirectionCache:
     """Copy cache and add new msg to it."""
     balise_cache = deepcopy(balise_cache)
     data = value["data"]
+    msgs = value.get("msgs", [])
     balise_id = data["content"]["balise_id"]
-    balise_cache["msg_refs"] += value["msgs"]
+    balise_cache["msg_refs"] += msgs
     balise_cache["balises"].append(data)
 
     if balise_cache["balise_id"] is None:

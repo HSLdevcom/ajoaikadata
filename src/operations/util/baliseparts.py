@@ -1,14 +1,14 @@
 from copy import deepcopy
 from typing import List, TypedDict
 
-from ...connectors.types import PulsarMsg
+from ...types import AjoaikadataMsg
 from ...ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
 
 BEACON_DATA_SCHEMA = JKVBeaconDataSchema()
 
 
 class BalisePartsCache(TypedDict):
-    msg_refs: List
+    msg_refs: List[str]
     parts: List[dict]
 
 
@@ -16,11 +16,11 @@ def create_empty_parts_cache() -> BalisePartsCache:
     return {"msg_refs": [], "parts": []}
 
 
-def add_msg_to_parts_cache(parts_cache: BalisePartsCache, value: PulsarMsg) -> BalisePartsCache:
+def add_msg_to_parts_cache(parts_cache: BalisePartsCache, value: AjoaikadataMsg) -> BalisePartsCache:
     """Create copy of the cache and add new value"""
     parts_cache = deepcopy(parts_cache)
     data = value["data"]
-    msgs = value["msgs"]
+    msgs = value.get("msgs", [])
     match data["content"]["transponder_msg_part"]:
         case 0:
             if len(parts_cache["parts"]) != 0:
