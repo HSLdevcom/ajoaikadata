@@ -1,8 +1,8 @@
 from copy import deepcopy
 from typing import List, TypedDict
 
-from connectors.types import PulsarMsg
-from ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
+from ....connectors.types import PulsarMsg
+from ....ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
 
 BEACON_DATA_SCHEMA = JKVBeaconDataSchema()
 

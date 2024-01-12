@@ -3,8 +3,8 @@ from typing import Tuple
 import bytewax.operators as op
 from bytewax.dataflow import Dataflow
 
-from connectors.pulsar import PulsarInput, PulsarOutput, PulsarClient
-from connectors.types import BytewaxMsgFromPulsar, PulsarMsg
+from ...connectors.pulsar import PulsarInput, PulsarOutput, PulsarClient
+from ...connectors.types import BytewaxMsgFromPulsar, PulsarMsg
 
 from .util.eventstate import (
     EventStateCache,
@@ -15,7 +15,7 @@ from .util.eventstate import (
 )
 from .util.stationstate import StationStateCache, create_empty_stationstate_cache, create_station_event
 
-from config import read_from_env
+from ...config import read_from_env
 
 input_topic, output_topic = read_from_env(("PULSAR_INPUT_TOPIC", "PULSAR_OUTPUT_TOPIC"))
 

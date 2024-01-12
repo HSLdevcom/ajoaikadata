@@ -9,7 +9,7 @@ import pulsar
 
 from .types import BytewaxMsgFromPulsar
 
-from config import read_from_env
+from ..config import read_from_env
 
 PULSAR_CONN_STR, PULSAR_CLIENT_NAME = read_from_env(
     ("PULSAR_CONN_STR", "PULSAR_CLIENT_NAME"), defaults=("pulsar://pulsar:6650",)

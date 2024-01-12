@@ -3,11 +3,11 @@ from typing import Tuple
 import bytewax.operators as op
 from bytewax.dataflow import Dataflow
 
-from connectors.pulsar import PulsarInput, PulsarOutput, PulsarClient
-from connectors.types import BytewaxMsgFromPulsar, PulsarMsg
-from ekeparser.ekeparser import parse_eke_data
+from ...connectors.pulsar import PulsarInput, PulsarOutput, PulsarClient
+from ...connectors.types import BytewaxMsgFromPulsar, PulsarMsg
+from ...ekeparser.ekeparser import parse_eke_data
 
-from ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
+from ...ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
 
 from .util.balisedirection import (
     BaliseDirectionCache,
@@ -22,7 +22,7 @@ from .util.baliseparts import (
     parse_balise_msg_from_parts,
 )
 
-from config import logger, read_from_env
+from ...config import logger, read_from_env
 
 input_topic, output_topic = read_from_env(("PULSAR_INPUT_TOPIC", "PULSAR_OUTPUT_TOPIC"))
 

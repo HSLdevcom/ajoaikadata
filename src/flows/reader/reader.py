@@ -3,13 +3,13 @@ from pathlib import Path
 import bytewax.operators as op
 from bytewax.dataflow import Dataflow
 
-from connectors.pulsar import PulsarOutput, PulsarClient
-from connectors.csv_directory import CSVDirInput
-from connectors.types import BytewaxMsgFromCSV
+from ...connectors.pulsar import PulsarOutput, PulsarClient
+from ...connectors.csv_directory import CSVDirInput
+from ...connectors.types import BytewaxMsgFromCSV
 
-import config
+from ...config import read_from_env
 
-(output_topic,) = config.read_from_env(("PULSAR_OUTPUT_TOPIC",))
+(output_topic,) = read_from_env(("PULSAR_OUTPUT_TOPIC",))
 output_client = PulsarClient(output_topic)
 
 

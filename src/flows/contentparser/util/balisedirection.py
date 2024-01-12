@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import List, Literal, TypedDict
 
-from connectors.types import PulsarMsg
+from ....connectors.types import PulsarMsg
 
 
 class BaliseDirectionCache(TypedDict):

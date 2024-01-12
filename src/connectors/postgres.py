@@ -7,7 +7,7 @@ import psycopg_pool
 
 from .types import BytewaxMsgFromPulsar
 
-from config import read_from_env
+from ..config import read_from_env
 
 (POSTGRES_CONN_STR,) = read_from_env(("POSTGRES_CONN_STR",))
 
