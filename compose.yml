@@ -5,7 +5,7 @@ services:
   reader:
     build: .
     environment:
-      - APP_NAME=reader
+      - BYTEWAX_PYTHON_FILE_PATH=app.flows.reader
       - BYTEWAX_PYTHON_PARAMETERS=-w 6
       - PULSAR_CLIENT_NAME=reader
       - PULSAR_OUTPUT_TOPIC=raw
@@ -25,7 +25,7 @@ services:
   contentparser:
     build: .
     environment:
-      - APP_NAME=contentparser
+      - BYTEWAX_PYTHON_FILE_PATH=app.flows.contentparser
       - BYTEWAX_PYTHON_PARAMETERS=-w 10
       - PULSAR_CLIENT_NAME=contentparser
       - PULSAR_INPUT_TOPIC=raw
@@ -39,7 +39,7 @@ services:
   eventcreator:
     build: .
     environment:
-      - APP_NAME=eventcreator
+      - BYTEWAX_PYTHON_FILE_PATH=app.flows.eventcreator
       - BYTEWAX_PYTHON_PARAMETERS=-w 1
       - PULSAR_CLIENT_NAME=eventcreator
       - PULSAR_INPUT_TOPIC=parsed
@@ -53,7 +53,7 @@ services:
   messagesink:
     build: .
     environment:
-      - APP_NAME=pgsink
+      - BYTEWAX_PYTHON_FILE_PATH=app.flows.pgsink
       - BYTEWAX_PYTHON_PARAMETERS=-w 1
       - PULSAR_CLIENT_NAME=messagesink
       - PULSAR_INPUT_TOPIC=parsed
@@ -70,7 +70,7 @@ services:
   eventsink:
     build: .
     environment:
-      - APP_NAME=pgsink
+      - BYTEWAX_PYTHON_FILE_PATH=app.flows.pgsink
       - BYTEWAX_PYTHON_PARAMETERS=-w 1
       - PULSAR_CLIENT_NAME=eventsink
       - PULSAR_INPUT_TOPIC=events

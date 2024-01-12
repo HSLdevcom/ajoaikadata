@@ -2,7 +2,7 @@
 
 cd $BYTEWAX_WORKDIR
 . /venv/bin/activate
-python -m bytewax.run app.app $BYTEWAX_PYTHON_PARAMETERS
+python -m bytewax.run $BYTEWAX_PYTHON_FILE_PATH $BYTEWAX_PYTHON_PARAMETERS
 
 echo 'Process ended.'
 
