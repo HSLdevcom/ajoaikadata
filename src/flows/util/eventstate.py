@@ -1,6 +1,6 @@
 from copy import deepcopy
 from typing import Any, Tuple, TypedDict
-from ..balise_registry import balise_registry
+from .balise_registry import balise_registry
 
 
 class LastStationEvent(TypedDict):
