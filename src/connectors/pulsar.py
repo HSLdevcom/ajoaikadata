@@ -39,7 +39,11 @@ class PulsarClient:
         """Get the pulsar producer. If not already initialized, create one for the configured topic."""
         if not self.producer:
             self.producer = self.client.create_producer(
-                self.topic_name, producer_name=f"{PULSAR_CLIENT_NAME}-{worker_index}"
+                self.topic_name,
+                producer_name=f"{PULSAR_CLIENT_NAME}-{worker_index}",
+                block_if_queue_full=True,
+                batching_enabled=True,
+                batching_max_publish_delay_ms=10,
             )
         return self.producer
 
@@ -51,7 +55,7 @@ class PulsarClient:
         for msg in msgs:
             self.consumer.acknowledge(pulsar.MessageId.deserialize(msg))
 
-    def ack(self, inspector, data: AjoaikadataMsgWithKey):  # TODO: Typing
+    def ack(self, inspector, data: AjoaikadataMsgWithKey):
         """Ack all related pulsar messages from a bytewax message."""
         key, value = data
         msgs = value.get("msgs")
@@ -106,11 +110,11 @@ class PulsarSink(StatelessSinkPartition):
         self.client = client
         self.producer = self.client.get_producer(worker_index)
 
-    def write_batch(self, data):
+    def write_batch(self, data: List[AjoaikadataMsgWithKey]):
         for msg in data:
             key, content = msg
             msg_data = json.dumps(content.get("data"), default=str)
-            self.producer.send(msg_data.encode("utf-8"), partition_key=key)
+            self.producer.send_async(msg_data.encode("utf-8"), callback=None, partition_key=key)
 
     def close(self):
         self.producer.flush()
