@@ -1,3 +1,7 @@
+"""
+Common operations not necessarily related to any step.
+"""
+
 from ..util.types import AjoaikadataMsgWithKey
 
 def filter_none(data: AjoaikadataMsgWithKey) -> AjoaikadataMsgWithKey | None:

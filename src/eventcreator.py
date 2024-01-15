@@ -1,3 +1,9 @@
+"""
+Event creator reads parsed message stream from Pulsar, analyzes events 
+(e.g. train stops, doors are opened), and creates station events from them.
+Events are sent back to Pulsar.
+"""
+
 import bytewax.operators as op
 from bytewax.dataflow import Dataflow
 

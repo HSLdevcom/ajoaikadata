@@ -1,3 +1,7 @@
+"""
+Input connection code for reading EKE csv files from a data directory
+"""
+
 from csv import DictReader
 import gzip
 from pathlib import Path

@@ -1,3 +1,7 @@
+"""
+Output connection code for sending data to Postgres.
+"""
+
 import json
 from typing import Callable, List
 
@@ -11,6 +15,11 @@ from ..util.config import logger, read_from_env
 
 (POSTGRES_CONN_STR,) = read_from_env(("POSTGRES_CONN_STR",))
 
+
+# Key is the name of the postgres table.
+# query is the copy command to the staging table
+# post_query is the command to move data from the staging table to the main table
+# mapper is the function to modify message data object to the database table schema
 PG_TARGET_TABLE = {
     "messages": {
         "query": SQL("COPY staging.{staging} (timestamp, msg_type, vehicle_id, message) FROM STDIN;"),
@@ -58,6 +67,7 @@ class PostgresClient:
         self.staging_tables: List[str] = []
 
     def prepare_staging_table(self, for_id: str) -> None:
+        """Create a staging table where the worker using this client copies data."""
         table_name = f"{self.target}-{for_id}"
         with self.pool.connection() as conn:
             with conn.cursor() as cur:
@@ -70,12 +80,11 @@ class PostgresClient:
         self.staging_tables.append(table_name)
 
     def insert(self, data: List[AjoaikadataMsgWithKey], id: str) -> None:
+        """Copy the batch of messages into the database."""
         with self.pool.connection() as conn:
             with conn.cursor() as cur:
                 # Should be empty, but just to be sure
-                cur.execute(
-                    SQL("DELETE FROM staging.{staging}").format(staging=Identifier(f"{self.target}-{id}"))
-                )
+                cur.execute(SQL("DELETE FROM staging.{staging}").format(staging=Identifier(f"{self.target}-{id}")))
 
                 with cur.copy(self.query.format(staging=Identifier(f"{self.target}-{id}"))) as copy:
                     for msg in data:

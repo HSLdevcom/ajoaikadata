@@ -1,6 +1,7 @@
 """
-Reader reads messages from csv storage and sends them to Pulsar.
+Reader reads messages from Azure Storage and sends them to Pulsar.
 """
+
 import bytewax.operators as op
 from bytewax.dataflow import Dataflow
 

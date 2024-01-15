@@ -1,6 +1,9 @@
 """
 Content parser is a bytewax app to convert binary content of messages to human readable format.
+It also combines balise messages and stores the direction, as balise messages are received in parts.
+Both input and output is Pulsar.
 """
+
 import bytewax.operators as op
 from bytewax.dataflow import Dataflow
 

@@ -1,3 +1,7 @@
+"""
+Operations related to create events from eke message stream.
+"""
+
 from copy import deepcopy
 from typing import Any, Tuple, TypedDict
 

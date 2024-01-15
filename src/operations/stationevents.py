@@ -1,3 +1,7 @@
+"""
+Operations related to create station events.
+"""
+
 from typing import Any, Tuple, TypedDict
 from datetime import datetime
 

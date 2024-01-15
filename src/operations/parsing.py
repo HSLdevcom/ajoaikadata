@@ -1,3 +1,7 @@
+"""
+Operations related to parsing messages.
+"""
+
 from ..ekeparser.ekeparser import parse_eke_data
 from ..util.types import AjoaikadataMsgWithKey
 

@@ -1,3 +1,5 @@
+""" Module to read balise registry """
+
 import csv
 from typing import Dict
 

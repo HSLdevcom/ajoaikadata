@@ -1,5 +1,5 @@
 """
-This directory contains code to deliver messages away from data pipeline. At least std output and Postgres will be supported.
+PG sink reads data from Pulsar and sends it to Postgres. The Postgres schema is defined in the connector module.
 """
 import bytewax.operators as op
 from bytewax.dataflow import Dataflow

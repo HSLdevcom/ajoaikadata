@@ -1,3 +1,7 @@
+"""
+Operations related to combine single balise messages from the same balise group as a one message with direction.
+"""
+
 from copy import deepcopy
 from typing import List, Literal, Tuple, TypedDict
 

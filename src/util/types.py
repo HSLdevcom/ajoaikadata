@@ -1,12 +1,16 @@
-from typing import Any, List, NotRequired, Tuple, TypedDict
+"""
+Module to contain type definitions for the messages that are processed in the dataflow.
+"""
+
+from typing import Any, NotRequired, TypedDict
 
 
 class AjoaikadataMsg(TypedDict):
     data: Any
-    msgs: NotRequired[List[str]]
+    msgs: NotRequired[list[str]]
 
 
-AjoaikadataMsgWithKey = Tuple[str, AjoaikadataMsg]
+AjoaikadataMsgWithKey = tuple[str, AjoaikadataMsg]
 
 
 def create_empty_msg() -> AjoaikadataMsg:

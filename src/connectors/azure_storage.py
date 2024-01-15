@@ -1,3 +1,7 @@
+"""
+Input connection code for reading EKE data blobs from Azure Storage.
+"""
+
 from collections.abc import Generator, Sequence
 from csv import DictReader
 from datetime import datetime, timedelta

@@ -1,3 +1,7 @@
+"""
+Operations related to combine balise message parts into one.
+"""
+
 from copy import deepcopy
 from typing import List, Tuple, TypedDict
 

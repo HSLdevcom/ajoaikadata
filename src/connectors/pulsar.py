@@ -63,6 +63,7 @@ class PulsarClient:
             self.ack_msgs(msgs)
 
     def ack_filter_none(self, data: AjoaikadataMsgWithKey) -> AjoaikadataMsgWithKey | None:
+        """ Filter away messages that contain no data, and ack them. Use with op.filter_map """
         key, msg = data
         if not msg.get("data"):
             self.ack_msgs(msg.get("msgs", []))

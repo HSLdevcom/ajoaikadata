@@ -1,3 +1,5 @@
+""" Helper module for configuration related stuff """
+
 from itertools import zip_longest
 import logging
 import os
@@ -7,6 +9,7 @@ from typing import Iterable, Tuple
 log_level = os.environ.get("LOG_LEVEL", logging.INFO)  # Use INFO as default.
 logging.basicConfig(level=log_level, format="%(levelname)s:%(module)s:%(message)s")
 logger = logging.getLogger()
+
 
 def read_from_env(env_names: Iterable[str], defaults: Iterable[str] = (), required: bool = True) -> Tuple[str, ...]:
     """

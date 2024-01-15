@@ -1,4 +1,8 @@
-""" Reads data from csv files, runs the ajoaikadata pipeline and stores results to Postgres. """
+""" 
+All ajoaikadata in the single dataflow
+Reads data from Azure Storage, runs the ajoaikadata pipeline and stores results to Postgres. 
+"""
+
 import bytewax.operators as op
 from bytewax.dataflow import Dataflow
 
