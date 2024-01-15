@@ -58,7 +58,7 @@ services:
       - PULSAR_CLIENT_NAME=messagesink
       - PULSAR_INPUT_TOPIC=parsed
       - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres
-      - POSTGRES_SINK_SCHEMA=MESSAGES
+      - POSTGRES_TARGET_TABLE=messages
     volumes:
       - ./src:/bytewax/app
     depends_on:
@@ -75,7 +75,7 @@ services:
       - PULSAR_CLIENT_NAME=eventsink
       - PULSAR_INPUT_TOPIC=events
       - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres
-      - POSTGRES_SINK_SCHEMA=EVENTS
+      - POSTGRES_TARGET_TABLE=events
     volumes:
       - ./src:/bytewax/app
     depends_on:

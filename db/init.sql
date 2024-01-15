@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS events (
     PRIMARY KEY (timestamp, event_type, vehicle_id)
 );
 
+-- Data will be copied to staging, and then inserted into main tables.
+CREATE SCHEMA staging;
+
 SELECT
     create_hypertable('messages', 'timestamp');
 
