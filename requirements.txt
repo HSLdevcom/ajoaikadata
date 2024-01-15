@@ -2,3 +2,4 @@ bytewax==0.18.0
 pulsar-client==3.3.0
 psycopg[binary]==3.1.12
 psycopg[pool]==3.1.12
+azure-storage-blob==12.19.0

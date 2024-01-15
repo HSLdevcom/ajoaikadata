@@ -1,10 +1,8 @@
 """ Reads data from csv files, runs the ajoaikadata pipeline and stores results to Postgres. """
-from pathlib import Path
-
 import bytewax.operators as op
 from bytewax.dataflow import Dataflow
 
-from .connectors.csv_directory import CSVDirInput
+from .connectors.azure_storage import AzureStorageInput
 from .connectors.postgres import PostgresOutput, PostgresClient
 
 from .ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
@@ -24,7 +22,7 @@ postgres_client_events = PostgresClient("events")
 
 
 flow = Dataflow("readerparser")
-stream = op.input("reader_in", flow, CSVDirInput(Path("/data/")))  # TODO: Configure path
+stream = op.input("reader_in", flow, AzureStorageInput())
 bytewax_msg_stream = op.map("csv_to_bytewax_msg", stream, csv_to_bytewax_msg)
 
 
