@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+
+  ajoaikadata:
+    build: .
+    environment:
+      - BYTEWAX_PYTHON_FILE_PATH=app.ajoaikadata
+      - BYTEWAX_PYTHON_PARAMETERS=-w 4
+      - POSTGRES_CONN_STR=postgresql://postgres:password@db:5432/postgres
+    volumes:
+      - ./src:/bytewax/app
+      - ./data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: "timescale/timescaledb-ha:pg15.4-ts2.11.2-all"
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
