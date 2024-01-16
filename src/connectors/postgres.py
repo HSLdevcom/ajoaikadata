@@ -102,7 +102,7 @@ class PostgresClient:
         with self.pool.connection() as conn:
             with conn.cursor() as cur:
                 for table in self.staging_tables:
-                    cur.execute(SQL("DROP TABLE staging.{table}").format(table={Identifier(table)}))
+                    cur.execute(SQL("DROP TABLE staging.{table}").format(table=Identifier(table)))
         self.pool.close()
 
 
