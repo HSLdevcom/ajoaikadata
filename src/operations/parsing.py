@@ -21,8 +21,8 @@ def raw_msg_to_eke(msg: AjoaikadataMsgWithKey) -> AjoaikadataMsgWithKey:
     data = value["data"]
     try:
         data = parse_eke_data(data["raw"], data["topic"])
-    except ValueError:
-        logger.error(f"Failed to parse eke data. Value was: {value}")
+    except ValueError as e:
+        logger.error(f"Failed to parse eke data.\n{e}\nValue was: {value}")
         data = None
 
     value["data"] = data  # assign parsed data to msg

@@ -13,6 +13,18 @@ EKE_SCHEMA = EKEMessageSchema(
 
 
 def parse_eke_data(raw_data: str, topic_name: str | None = None) -> dict | None:
+    """Parse Eke message from binary data to dict"""
+    if not topic_name:
+        return None
+
+    topic_parts = topic_name.split("/")
+
+    topic_msg_type = topic_parts[5]
+
+    # connectionStatus is string, do not parse it
+    if topic_msg_type == "connectionStatus":
+        return None
+
     payload = bytes.fromhex(raw_data)
 
     data = EKE_SCHEMA.parse_content(payload)
@@ -20,8 +32,6 @@ def parse_eke_data(raw_data: str, topic_name: str | None = None) -> dict | None:
     if not data:
         return None
 
-    if topic_name:
-        data["vehicle"] = topic_name.split("/")[3]
-        data["cabin"] = topic_name.split("/")[4]
+    data["vehicle"] = topic_parts[3]
 
     return data
