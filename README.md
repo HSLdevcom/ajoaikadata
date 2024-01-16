@@ -26,12 +26,12 @@ The tested versions are:
 - [`docs`](./docs) Additional documentation files for PoC, such as architecture diagrams.
 
 - [`src`](./src/): Bytewax code. In the local dev setup, this will be mounted as a volume for bytewax application code. All bytewax applications are placed on the root level of the directory.
-- [`src/connectors`](./scr/connectors): Custom made Bytewax connectors. They can be used to send / receive data from Pulsar, read data from Azure Storage and csv directory (in a way that the execution can be parallelized) and insert data to the Postgres database.
-- [`src/operations`](./scr/operations): Directory for Bytewax pipeline operations. Some of the operations can be used on multiple Bytewax dataflow apps, so operations are located here to be imported.
+- [`src/connectors`](./src/connectors): Custom made Bytewax connectors. They can be used to send / receive data from Pulsar, read data from Azure Storage and csv directory (in a way that the execution can be parallelized) and insert data to the Postgres database.
+- [`src/operations`](./src/operations): Directory for Bytewax pipeline operations. Some of the operations can be used on multiple Bytewax dataflow apps, so operations are located here to be imported.
 
 
-- [`src/ekeparser`](./scr/ekeparser): Module to parse EKE's binary messages to human readable format.
-- [`src/util`](./scr/util): Other related code used in dataflows. The most notable module is balise_registry, which contains the manually selected mapping from balise id's to stations and tracks.
+- [`src/ekeparser`](./src/ekeparser): Module to parse EKE's binary messages to human readable format.
+- [`src/util`](./src/util): Other related code used in dataflows. The most notable module is balise_registry, which contains the manually selected mapping from balise id's to stations and tracks.
 
 ## Installation and running services
 
