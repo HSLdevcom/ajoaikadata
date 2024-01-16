@@ -22,32 +22,33 @@ from ..util.config import logger, read_from_env
 # mapper is the function to modify message data object to the database table schema
 PG_TARGET_TABLE = {
     "messages": {
-        "query": SQL("COPY staging.{staging} (timestamp, msg_type, vehicle_id, message) FROM STDIN;"),
+        "query": SQL("COPY staging.{staging} (ntp_timestamp, mqtt_timestamp, msg_type, vehicle_id, message) FROM STDIN;"),
         "post_query": SQL(
             """
-            INSERT INTO messages (timestamp, msg_type, vehicle_id, message)
-            SELECT timestamp, msg_type, vehicle_id, message FROM staging.{staging} ON CONFLICT DO NOTHING;
+            INSERT INTO messages (ntp_timestamp, mqtt_timestamp, msg_type, vehicle_id, message)
+            SELECT ntp_timestamp, mqtt_timestamp, msg_type, vehicle_id, message FROM staging.{staging} ON CONFLICT DO NOTHING;
             DELETE FROM staging.{staging};
             """
         ),
         "mapper": lambda data_obj: (
-            data_obj["eke_timestamp"],
+            data_obj["ntp_timestamp"],
+            data_obj["mqtt_timestamp"],
             data_obj["msg_type"],
             data_obj["vehicle"],
             json.dumps(data_obj, default=str),
         ),
     },
     "events": {
-        "query": SQL("COPY staging.{staging} (timestamp, event_type, vehicle_id, state) FROM STDIN;"),
+        "query": SQL("COPY staging.{staging} (ntp_timestamp, event_type, vehicle_id, state) FROM STDIN;"),
         "post_query": SQL(
             """
-            INSERT INTO events (timestamp, event_type, vehicle_id, state)
-            SELECT timestamp, event_type, vehicle_id, state FROM staging.{staging} ON CONFLICT DO NOTHING;
+            INSERT INTO events (ntp_timestamp, event_type, vehicle_id, state)
+            SELECT ntp_timestamp, event_type, vehicle_id, state FROM staging.{staging} ON CONFLICT DO NOTHING;
             DELETE FROM staging.{staging};
             """
         ),
         "mapper": lambda data_obj: (
-            data_obj["eke_timestamp"],
+            data_obj["ntp_timestamp"],
             data_obj["event_type"],
             data_obj["vehicle"],
             json.dumps(data_obj["state"], default=str),

@@ -24,7 +24,7 @@ class EventStateCache(TypedDict):
 
 class Event(TypedDict):
     vehicle: Any
-    eke_timestamp: Any
+    ntp_timestamp: Any
     event_type: str
     state: EventStateCache
 
@@ -32,7 +32,7 @@ class Event(TypedDict):
 def create_event(data: dict, event_type: str, state: EventStateCache) -> Event:
     return {
         "vehicle": data["vehicle"],
-        "eke_timestamp": data["eke_timestamp"],
+        "ntp_timestamp": data["ntp_timestamp"],
         "event_type": event_type,
         "state": state,
     }

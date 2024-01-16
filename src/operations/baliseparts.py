@@ -3,6 +3,7 @@ Operations related to combine balise message parts into one.
 """
 
 from copy import deepcopy
+import json
 from typing import List, Tuple, TypedDict
 
 from ..util.types import AjoaikadataMsg, create_empty_msg
@@ -31,11 +32,19 @@ def add_msg_to_parts_cache(parts_cache: BalisePartsCache, value: AjoaikadataMsg)
     match data["content"]["transponder_msg_part"]:
         case 0:
             if len(parts_cache["parts"]) != 0:
-                raise ValueError(f"Unexpected msg part 1, there was already content in the cache.")
+                raise ValueError(
+                    "Unexpected msg part 1, there was already content in the cache.\n"
+                    f"Cache: {json.dumps(parts_cache, default=str)}\n"
+                    f"Msg:{json.dumps(value, default=str)}"
+                )
             parts_cache["parts"].append(data)
         case 1:
             if len(parts_cache["parts"]) != 1:
-                raise ValueError(f"Unexpected msg part 2, there should be exact one part in the cache at this point.")
+                raise ValueError(
+                    "Unexpected msg part 2, there should be exact one part in the cache at this point.\n"
+                    f"Cache: {json.dumps(parts_cache, default=str)}\n"
+                    f"Msg:{json.dumps(value, default=str)}"
+                )
             parts_cache["parts"].append(data)
         case _:
             raise ValueError(f"Unexpected msg part index {data['content']['transponder_msg_part']}.")

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import math
 import struct
 from typing import Literal
@@ -17,7 +17,7 @@ def float_parser(content: bytes) -> float:
 def timestamp_parser(content: bytes, endian: Literal["big", "little"] = "little") -> datetime:
     """ Big endian bytes to datetime """
     val = int_parser(content, endian)
-    return datetime.utcfromtimestamp(val)
+    return datetime.fromtimestamp(val, timezone.utc)
 
 
 def timestamp_str_parser(content: bytes, endian: Literal["big", "little"] = "little") -> str:

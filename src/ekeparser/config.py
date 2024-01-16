@@ -1,7 +1,7 @@
 SINK = "DummySink"  # ConsoleSink, DummySink, PostgresSink
 POSTGRES_CONN_STR = "postgresql://postgres:password@localhost:5433"
 HEADER_SETTINGS = {
-    "limit_fields": ["msg_type", "msg_name", "eke_timestamp"]
+    "limit_fields": ["msg_type", "msg_name", "eke_timestamp", "ntp_timestamp"]
 }
 SCHEMA_SETTINGS = {
     1: {},

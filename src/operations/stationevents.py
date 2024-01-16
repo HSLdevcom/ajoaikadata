@@ -19,7 +19,7 @@ class StationStateCache(TypedDict, total=False):
 
 class StationEvent(TypedDict):
     vehicle: Any
-    eke_timestamp: Any
+    ntp_timestamp: Any
     event_type: str
     state: StationStateCache
 
@@ -27,7 +27,7 @@ class StationEvent(TypedDict):
 def create_station_event(data: Event, state: StationStateCache) -> StationEvent:
     return {
         "vehicle": data["vehicle"],
-        "eke_timestamp": data["eke_timestamp"],
+        "ntp_timestamp": data["ntp_timestamp"],
         "event_type": "station",
         "state": state,
     }
@@ -67,17 +67,17 @@ def station_event_creator(
 
         case "stopped":
             if not last_state.get("time_arrived"):
-                new_state["time_arrived"] = data["eke_timestamp"]
+                new_state["time_arrived"] = data["ntp_timestamp"]
 
         case "doors_opened":
             pass
 
         case "doors_closed":
             # update also the existing value, because we want to get the last one
-            new_state["time_doors_last_closed"] = data["eke_timestamp"]
+            new_state["time_doors_last_closed"] = data["ntp_timestamp"]
 
         case "moving":
-            new_state["time_departed"] = data["eke_timestamp"]
+            new_state["time_departed"] = data["ntp_timestamp"]
 
         case "DEPARTURE":
             station_event_to_send = create_station_event(data, last_state)
