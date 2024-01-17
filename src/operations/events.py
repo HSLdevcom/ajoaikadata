@@ -21,6 +21,7 @@ class UDPEventField(TypedDict):
 UDP_EVENT_FIELDS: list[UDPEventField] = [
     {"name": "doors_open", "true_event": "doors_opened", "false_event": "doors_closed", "ignore_none": False},
     {"name": "standstill", "true_event": "stopped", "false_event": "moving", "ignore_none": False},
+    {"name": "active_cabin", "true_event": "cabin_changed", "false_event": "cabin_changed", "ignore_none": True},
 ]
 
 

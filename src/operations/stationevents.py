@@ -87,8 +87,12 @@ def create_station_events(
             station_event_to_send = _create_event(data, last_state)
             last_state = create_empty_stationstate_cache()
 
+        case "cabin_changed":
+            # Train has stopped and probably will change the direction. Release the message.
+            station_event_to_send = _create_event(data, last_state)
+            last_state = create_empty_stationstate_cache()
         case _:
-            logger.warning("Unknown event type for station event.")
+            logger.info(f"Unknown event type for station event: {data['event_type']}.")
 
     if station_event_to_send:
         msg_out: AjoaikadataMsg = {"msgs": value.get("msgs", []), "data": station_event_to_send}
