@@ -114,7 +114,7 @@ def event_creator(last_state: EventStateCache, value: AjoaikadataMsg) -> Tuple[E
     if data["msg_type"] == 1:
         last_state, event = update_udp_state(last_state, data)
 
-    elif data["msg_type"] == 5:
+    elif data["msg_type"] == 5 and not data.get("incomplete"):
         last_state, event = update_balise_state(last_state, data)
 
     msg: AjoaikadataMsg = {"msgs": value.get("msgs", []), "data": event}

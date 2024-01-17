@@ -71,7 +71,7 @@ def create_directions_for_balises(
     data = value["data"]
 
     # No balise message, skip
-    if data["msg_type"] != 5:
+    if data["msg_type"] != 5 or data.get("incomplete"):
         return balise_cache, value
 
     balise_id = data["content"]["balise_id"]
