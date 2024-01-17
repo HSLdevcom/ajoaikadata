@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS events (
     ntp_timestamp TIMESTAMPTZ NOT NULL,
     event_type TEXT NOT NULL,
     vehicle_id INT NOT NULL,
-    state JSONB NOT NULL,
+    data JSONB NOT NULL,
     PRIMARY KEY (ntp_timestamp, event_type, vehicle_id)
 );
 

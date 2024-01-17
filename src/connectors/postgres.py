@@ -39,11 +39,11 @@ PG_TARGET_TABLE = {
         ),
     },
     "events": {
-        "query": SQL("COPY staging.{staging} (ntp_timestamp, event_type, vehicle_id, state) FROM STDIN;"),
+        "query": SQL("COPY staging.{staging} (ntp_timestamp, event_type, vehicle_id, data) FROM STDIN;"),
         "post_query": SQL(
             """
-            INSERT INTO events (ntp_timestamp, event_type, vehicle_id, state)
-            SELECT ntp_timestamp, event_type, vehicle_id, state FROM staging.{staging} ON CONFLICT DO NOTHING;
+            INSERT INTO events (ntp_timestamp, event_type, vehicle_id, data)
+            SELECT ntp_timestamp, event_type, vehicle_id, data FROM staging.{staging} ON CONFLICT DO NOTHING;
             DELETE FROM staging.{staging};
             """
         ),
@@ -51,7 +51,7 @@ PG_TARGET_TABLE = {
             data_obj["ntp_timestamp"],
             data_obj["event_type"],
             data_obj["vehicle"],
-            json.dumps(data_obj["state"], default=str),
+            json.dumps(data_obj["data"], default=str),
         ),
     },
 }

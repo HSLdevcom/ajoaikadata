@@ -14,8 +14,8 @@ from .ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
 from .operations.common import filter_none
 from .operations.balisedirection import create_directions_for_balises, create_empty_balise_cache
 from .operations.baliseparts import combine_balise_parts, create_empty_parts_cache
-from .operations.events import event_creator, create_empty_eventstate_cache
-from .operations.stationevents import station_event_creator, create_empty_stationstate_cache
+from .operations.events import create_events, create_empty_state
+from .operations.stationevents import create_station_events, create_empty_stationstate_cache
 from .operations.parsing import csv_to_bytewax_msg, raw_msg_to_eke
 
 BEACON_DATA_SCHEMA = JKVBeaconDataSchema()
@@ -48,8 +48,8 @@ op.output("contentparser_out", eke_stream_with_balises_dirs, PostgresOutput(post
 event_stream = op.stateful_map(
     "event_creator",
     eke_stream_with_balises_dirs,
-    lambda: create_empty_eventstate_cache(),
-    event_creator,
+    lambda: create_empty_state(),
+    create_events,
 )
 event_stream = op.filter_map("filter_none_event_creator", event_stream, filter_none)
 op.output("events_out", event_stream, PostgresOutput(postgres_client_events, identifier="events"))
@@ -58,7 +58,7 @@ station_stream = op.stateful_map(
     "station_event_creator",
     event_stream,
     lambda: create_empty_stationstate_cache(),
-    station_event_creator,
+    create_station_events,
 )
 station_stream = op.filter_map("station_combiner_filtered", station_stream, filter_none)
 op.output("stations_out", station_stream, PostgresOutput(postgres_client_events, identifier="stations"))

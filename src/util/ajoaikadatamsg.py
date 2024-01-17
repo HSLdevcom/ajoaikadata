@@ -13,8 +13,8 @@ class AjoaikadataMsg(TypedDict):
 AjoaikadataMsgWithKey = tuple[str, AjoaikadataMsg]
 
 
-def create_empty_msg() -> AjoaikadataMsg:
-    return {"data": None, "msgs": []}
+def create_empty_msg(with_refs: list = []) -> AjoaikadataMsg:
+    return {"data": None, "msgs": with_refs}
 
 
 def calculate_time_diff(msg1: AjoaikadataMsg, msg2: AjoaikadataMsg) -> float:
