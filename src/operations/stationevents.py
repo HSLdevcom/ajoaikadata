@@ -66,8 +66,8 @@ def create_station_events(
             last_state["track"] = data["data"]["track"]
 
         case "stopped":
-            # Update arrival time
-            if not last_state.get("time_arrived"):
+            # Update arrival time. If doors were not opened, override the value.
+            if not last_state.get("time_arrived") or not last_state.get("time_doors_last_closed"):
                 last_state["time_arrived"] = data["ntp_timestamp"]
 
         case "doors_opened":
@@ -75,7 +75,7 @@ def create_station_events(
             pass
 
         case "doors_closed":
-            # Update last closed time
+            # Update last closed time. Always override, because we want to have the last value.
             last_state["time_doors_last_closed"] = data["ntp_timestamp"]
 
         case "moving":

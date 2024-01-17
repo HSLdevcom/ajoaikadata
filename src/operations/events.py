@@ -13,8 +13,8 @@ from ..util.config import logger
 
 class UDPEventField(TypedDict):
     name: str  # Name of the UDP msg field
-    true_event: str  # Event to be created when the field turns true
-    false_event: str  # Event to be created when the field turns false
+    true_event: str | None  # Event to be created when the field turns true
+    false_event: str | None  # Event to be created when the field turns false
     ignore_none: bool  # If None value is normal and should not be updated.
 
 
@@ -22,6 +22,19 @@ UDP_EVENT_FIELDS: list[UDPEventField] = [
     {"name": "doors_open", "true_event": "doors_opened", "false_event": "doors_closed", "ignore_none": False},
     {"name": "standstill", "true_event": "stopped", "false_event": "moving", "ignore_none": False},
     {"name": "active_cabin", "true_event": "cabin_changed", "false_event": "cabin_changed", "ignore_none": True},
+    {"name": "train_no", "true_event": "train_no_changed", "false_event": None, "ignore_none": True},
+    {
+        "name": "vehicle_count",
+        "true_event": "vehicle_count_changed",
+        "false_event": "vehicle_count_changed",
+        "ignore_none": True,
+    },
+    {
+        "name": "all_vehicles",
+        "true_event": "vehicle_ids_changed",
+        "false_event": "vehicle_ids_changed",
+        "ignore_none": True,
+    },
 ]
 
 
@@ -29,6 +42,9 @@ class UDPState(TypedDict):
     active_cabin: str | None
     doors_open: bool | None
     standstill: bool | None
+    train_no: int | None
+    vehicle_count: int | None
+    all_vehicles: list[int] | None
     last_updated: datetime | None
 
 
@@ -63,7 +79,15 @@ def _create_event(data: dict, event_type: str, event_data: dict) -> Event:
 def create_empty_state() -> VehicleState:
     """Create a new cache."""
     return (
-        {"active_cabin": None, "doors_open": None, "standstill": None, "last_updated": None},
+        {
+            "active_cabin": None,
+            "doors_open": None,
+            "standstill": None,
+            "train_no": None,
+            "vehicle_count": None,
+            "all_vehicles": None,
+            "last_updated": None,
+        },
         {"station": None, "track": None, "event": None, "last_updated": None},
     )
 
@@ -84,15 +108,19 @@ def _check_udp_event(last_state: UDPState, data: dict) -> Tuple[UDPState, Event 
         data_field = data["content"][field["name"]]
 
         if data_field != last_state[field["name"]]:
+            event_name = field["true_event"] if data_field else field["false_event"]
+
+            if not event_name:
+                return last_state, None
+
             if last_state["last_updated"] and ntp_timestamp < last_state["last_updated"]:
                 logger.warning(f"Tried to trigger {field['name']} event, but the message was old. Discarding {data}")
                 return last_state, None
+
             last_state[field["name"]] = data_field
             last_state["last_updated"] = ntp_timestamp
             event_msg_data = {field["name"]: data_field}
-            return last_state, _create_event(
-                data, field["true_event"] if data_field else field["false_event"], event_msg_data
-            )
+            return last_state, _create_event(data, event_name, event_msg_data)
 
     # Nothing was updated
     return last_state, None
@@ -126,11 +154,7 @@ def _check_station_event(last_state: StationState, data: dict) -> Tuple[StationS
         last_state["event"] = balise_data["type"].lower()
         last_state["last_updated"] = ntp_timestamp
 
-        event_msg_data = {
-            "station": balise_data["station"],
-            "track": balise_data["track"],
-            "triggered_by": balise_key
-        }
+        event_msg_data = {"station": balise_data["station"], "track": balise_data["track"], "triggered_by": balise_key}
 
         return last_state, _create_event(data, balise_data["type"].lower(), event_msg_data)
 
