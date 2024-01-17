@@ -22,7 +22,4 @@ SELECT
     create_hypertable('messages', 'ntp_timestamp');
 
 SELECT
-    create_hypertable('messages_raw', 'ntp_timestamp');
-
-SELECT
     create_hypertable('events', 'ntp_timestamp');
