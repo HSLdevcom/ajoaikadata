@@ -5,7 +5,7 @@ Operations related to combine single balise messages from the same balise group 
 from copy import deepcopy
 from typing import List, Literal, Tuple, TypedDict
 
-from ..util.types import AjoaikadataMsg, create_empty_msg
+from ..util.ajoaikadatamsg import AjoaikadataMsg, create_empty_msg
 
 
 class BaliseDirectionCache(TypedDict):

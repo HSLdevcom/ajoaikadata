@@ -9,7 +9,7 @@ from bytewax.outputs import DynamicSink, StatelessSinkPartition
 from psycopg.sql import SQL, Identifier
 import psycopg_pool
 
-from ..util.types import AjoaikadataMsgWithKey
+from ..util.ajoaikadatamsg import AjoaikadataMsgWithKey
 
 from ..util.config import logger, read_from_env
 

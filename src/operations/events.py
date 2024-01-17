@@ -5,7 +5,7 @@ Operations related to create events from eke message stream.
 from copy import deepcopy
 from typing import Any, Tuple, TypedDict
 
-from ..util.types import AjoaikadataMsg
+from ..util.ajoaikadatamsg import AjoaikadataMsg
 from ..util.balise_registry import balise_registry
 
 

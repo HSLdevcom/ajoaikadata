@@ -6,7 +6,7 @@ from typing import Any, Tuple, TypedDict
 from datetime import datetime
 
 from .events import Event
-from ..util.types import AjoaikadataMsg, create_empty_msg
+from ..util.ajoaikadatamsg import AjoaikadataMsg, create_empty_msg
 
 
 class StationStateCache(TypedDict, total=False):
