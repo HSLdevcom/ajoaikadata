@@ -26,6 +26,7 @@ def _parse_balise_msg_from_parts(msg_part1: AjoaikadataMsg, msg_part2: Ajoaikada
     payload = msg_part1["data"]["content"]["content"] + msg_part2["data"]["content"]["content"]
     parsed_data = BEACON_DATA_SCHEMA.parse_content(payload)
 
+    # Get the base content from the first part
     data_obj = msg_part1["data"]
     data_obj["content"] = parsed_data
 
@@ -56,6 +57,7 @@ def combine_balise_parts(
     if paired_data and abs(calculate_time_diff(value, paired_data)) < BALISE_MAX_MSG_TIME_DIFF:
         # Reset cache
         parts_cache[msg_index_pair] = None
+        # Combine message, pass parts in the right order
         combined_msg = (
             _parse_balise_msg_from_parts(value, paired_data)
             if msg_part == 0
