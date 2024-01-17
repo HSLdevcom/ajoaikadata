@@ -30,6 +30,9 @@ def _parse_balise_msg_from_parts(msg_part1: AjoaikadataMsg, msg_part2: Ajoaikada
     data_obj = msg_part1["data"]
     data_obj["content"] = parsed_data
 
+    # Get the last arrived timestamp, because it triggers the msg forward
+    data_obj["mqtt_timestamp"] = max(msg_part1["data"]["mqtt_timestamp"], msg_part2["data"]["mqtt_timestamp"])
+
     combined_msg: AjoaikadataMsg = {"msgs": msg_part1.get("msgs", []) + msg_part2.get("msgs", []), "data": data_obj}
 
     return combined_msg
@@ -70,6 +73,7 @@ def combine_balise_parts(
     if old_cache:
         msg_to_send = old_cache
         logger.warning(f"Single balise msg in the cache which could not be resolved: {old_cache}")
+        msg_to_send["data"]["released_mqtt_timestamp"] = value["data"]["mqtt_timestamp"]
         msg_to_send["data"]["incomplete"] = True
     else:
         msg_to_send = create_empty_msg()

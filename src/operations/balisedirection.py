@@ -36,6 +36,10 @@ def _calculate_direction(balise_msg1: AjoaikadataMsg, balise_msg2: AjoaikadataMs
 
     # Use the first message as the base
     data_obj = balise_msg1["data"]
+
+    # Get the last arrived timestamp, because it triggers the msg forward
+    data_obj["mqtt_timestamp"] = max(balise_msg1["data"]["mqtt_timestamp"], balise_msg2["data"]["mqtt_timestamp"])
+
     # cba is not needed any more
     del data_obj["content"]["balise_cba"]
     data_obj["content"]["direction"] = direction
@@ -75,7 +79,8 @@ def create_directions_for_balises(
         # Time diff was too big. Release the old message
         msg_to_send = prev_msg_with_same_id
         logger.warning(f"Balise direction could not be resolved for msg: {prev_msg_with_same_id}")
-        msg_to_send["data"]["incomplete"] = True       
+        msg_to_send["data"]["incomplete"] = True
+        msg_to_send["data"]["released_mqtt_timestamp"] = value["data"]["mqtt_timestamp"]
 
     else:
         msg_to_send = create_empty_msg()
