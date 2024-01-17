@@ -39,18 +39,36 @@ PG_TARGET_TABLE = {
         ),
     },
     "events": {
-        "query": SQL("COPY staging.{staging} (ntp_timestamp, event_type, vehicle_id, data) FROM STDIN;"),
+        "query": SQL("COPY staging.{staging} (ntp_timestamp, mqtt_timestamp, event_type, vehicle_id, data) FROM STDIN;"),
         "post_query": SQL(
             """
-            INSERT INTO events (ntp_timestamp, event_type, vehicle_id, data)
-            SELECT ntp_timestamp, event_type, vehicle_id, data FROM staging.{staging} ON CONFLICT DO NOTHING;
+            INSERT INTO events (ntp_timestamp, mqtt_timestamp, event_type, vehicle_id, data)
+            SELECT ntp_timestamp, mqtt_timestamp, event_type, vehicle_id, data FROM staging.{staging} ON CONFLICT DO NOTHING;
             DELETE FROM staging.{staging};
             """
         ),
         "mapper": lambda data_obj: (
             data_obj["ntp_timestamp"],
+            data_obj["mqtt_timestamp"],
             data_obj["event_type"],
             data_obj["vehicle"],
+            json.dumps(data_obj["data"], default=str),
+        ),
+    },
+    "stationevents": {
+        "query": SQL("COPY staging.{staging} (ntp_timestamp, vehicle_id, station, track, data) FROM STDIN;"),
+        "post_query": SQL(
+            """
+            INSERT INTO stationevents (ntp_timestamp, vehicle_id, station, track, data)
+            SELECT ntp_timestamp, vehicle_id, station, track, data FROM staging.{staging} ON CONFLICT DO NOTHING;
+            DELETE FROM staging.{staging};
+            """
+        ),
+        "mapper": lambda data_obj: (
+            data_obj["ntp_timestamp"],
+            data_obj["vehicle"],
+            data_obj["data"]["station"],
+            data_obj["data"]["track"],
             json.dumps(data_obj["data"], default=str),
         ),
     },
@@ -103,7 +121,7 @@ class PostgresClient:
         with self.pool.connection() as conn:
             with conn.cursor() as cur:
                 for table in self.staging_tables:
-                    cur.execute(SQL("DROP TABLE staging.{table}").format(table=Identifier(table)))
+                    cur.execute(SQL("DROP TABLE IF EXISTS staging.{table}").format(table=Identifier(table)))
         self.pool.close()
 
 

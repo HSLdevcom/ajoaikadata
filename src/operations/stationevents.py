@@ -10,7 +10,7 @@ from ..util.ajoaikadatamsg import AjoaikadataMsg, create_empty_msg
 
 from ..util.config import logger
 
-class StationStateCache(TypedDict, total=False):
+class StationStateCache(TypedDict):
     station: str | None
     track: int | None
     time_arrived: datetime | None
@@ -25,7 +25,10 @@ class StationEvent(TypedDict):
     data: StationStateCache
 
 
-def _create_event(data: Event, state: StationStateCache) -> StationEvent:
+def _create_event(data: Event, state: StationStateCache) -> StationEvent | None:
+    if not state["station"] or not state["track"]:
+        return None
+
     return {
         "vehicle": data["vehicle"],
         "ntp_timestamp": data["ntp_timestamp"],
@@ -50,7 +53,6 @@ def create_station_events(
 ) -> Tuple[StationStateCache, AjoaikadataMsg]:
     data: Event = value["data"]
 
-    new_state: StationStateCache = {}
     station_event_to_send = None
 
     match data["event_type"]:
@@ -60,13 +62,13 @@ def create_station_events(
                 station_event_to_send = _create_event(data, last_state)
                 last_state = create_empty_stationstate_cache()
 
-            new_state["station"] = data["data"]["station"]
-            new_state["track"] = data["data"]["track"]
+            last_state["station"] = data["data"]["station"]
+            last_state["track"] = data["data"]["track"]
 
         case "stopped":
             # Update arrival time
             if not last_state.get("time_arrived"):
-                new_state["time_arrived"] = data["ntp_timestamp"]
+                last_state["time_arrived"] = data["ntp_timestamp"]
 
         case "doors_opened":
             # Does nothing at the moment
@@ -74,17 +76,16 @@ def create_station_events(
 
         case "doors_closed":
             # Update last closed time
-            new_state["time_doors_last_closed"] = data["ntp_timestamp"]
+            last_state["time_doors_last_closed"] = data["ntp_timestamp"]
 
         case "moving":
             # Update departure time
-            new_state["time_departed"] = data["ntp_timestamp"]
+            last_state["time_departed"] = data["ntp_timestamp"]
 
         case "departure":
             # release the event
             station_event_to_send = _create_event(data, last_state)
             last_state = create_empty_stationstate_cache()
-            new_state = {}
 
         case _:
             logger.warning("Unknown event type for station event.")
@@ -93,4 +94,4 @@ def create_station_events(
         msg_out: AjoaikadataMsg = {"msgs": value.get("msgs", []), "data": station_event_to_send}
     else:
         msg_out = create_empty_msg()
-    return last_state | new_state, msg_out
+    return last_state, msg_out

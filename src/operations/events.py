@@ -75,7 +75,7 @@ def _check_udp_event(last_state: UDPState, data: dict) -> Tuple[UDPState, Event 
     ntp_timestamp: datetime = data["ntp_timestamp"]
     # Initialize last_state if it is None
     for field in UDP_EVENT_FIELDS:
-        if not field["ignore_none"] and last_state[field["name"]]:
+        if not field["ignore_none"] and last_state[field["name"]] is None:
             last_state[field["name"]] = data["content"][field["name"]]
             last_state["last_updated"] = ntp_timestamp
 
@@ -128,8 +128,7 @@ def _check_station_event(last_state: StationState, data: dict) -> Tuple[StationS
         event_msg_data = {
             "station": balise_data["station"],
             "track": balise_data["track"],
-            "event": balise_data["type"].lower(),
-            "last_updated": ntp_timestamp,
+            "triggered_by": balise_key
         }
 
         return last_state, _create_event(data, balise_data["type"].lower(), event_msg_data)

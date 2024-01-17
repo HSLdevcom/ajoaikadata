@@ -23,6 +23,7 @@ BEACON_DATA_SCHEMA = JKVBeaconDataSchema()
 
 postgres_client_messages = PostgresClient("messages")
 postgres_client_events = PostgresClient("events")
+postgres_client_stationevents = PostgresClient("stationevents")
 
 
 flow = Dataflow("readerparser")
@@ -52,7 +53,7 @@ event_stream = op.stateful_map(
     create_events,
 )
 event_stream = op.filter_map("filter_none_event_creator", event_stream, filter_none)
-op.output("events_out", event_stream, PostgresOutput(postgres_client_events, identifier="events"))
+op.output("events_out", event_stream, PostgresOutput(postgres_client_events))
 
 station_stream = op.stateful_map(
     "station_event_creator",
@@ -61,4 +62,4 @@ station_stream = op.stateful_map(
     create_station_events,
 )
 station_stream = op.filter_map("station_combiner_filtered", station_stream, filter_none)
-op.output("stations_out", station_stream, PostgresOutput(postgres_client_events, identifier="stations"))
+op.output("stations_out", station_stream, PostgresOutput(postgres_client_stationevents))
