@@ -11,7 +11,7 @@ from .connectors.pulsar import PulsarInput, PulsarOutput, PulsarClient
 
 from .operations.common import filter_none
 from .operations.events import create_events, create_empty_state
-from .operations.stationevents import create_station_events, create_empty_stationstate_cache
+from .operations.stationevents import create_station_events, init_vehicle_station_cache
 
 from .util.config import read_from_env
 
@@ -37,7 +37,7 @@ op.inspect(
 station_stream = op.stateful_map(
     "station_event_creator",
     event_stream,
-    lambda: create_empty_stationstate_cache(),
+    lambda: init_vehicle_station_cache(),
     create_station_events,
 )
 station_stream = op.filter_map("station_combiner_filtered", station_stream, filter_none)

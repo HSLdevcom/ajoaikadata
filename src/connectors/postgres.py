@@ -22,7 +22,9 @@ from ..util.config import logger, read_from_env
 # mapper is the function to modify message data object to the database table schema
 PG_TARGET_TABLE = {
     "messages": {
-        "query": SQL("COPY staging.{staging} (ntp_timestamp, mqtt_timestamp, msg_type, vehicle_id, message) FROM STDIN;"),
+        "query": SQL(
+            "COPY staging.{staging} (ntp_timestamp, mqtt_timestamp, msg_type, vehicle_id, message) FROM STDIN;"
+        ),
         "post_query": SQL(
             """
             INSERT INTO messages (ntp_timestamp, mqtt_timestamp, msg_type, vehicle_id, message)
@@ -39,7 +41,9 @@ PG_TARGET_TABLE = {
         ),
     },
     "events": {
-        "query": SQL("COPY staging.{staging} (ntp_timestamp, mqtt_timestamp, event_type, vehicle_id, data) FROM STDIN;"),
+        "query": SQL(
+            "COPY staging.{staging} (ntp_timestamp, mqtt_timestamp, event_type, vehicle_id, data) FROM STDIN;"
+        ),
         "post_query": SQL(
             """
             INSERT INTO events (ntp_timestamp, mqtt_timestamp, event_type, vehicle_id, data)
@@ -67,8 +71,8 @@ PG_TARGET_TABLE = {
         "mapper": lambda data_obj: (
             data_obj["ntp_timestamp"],
             data_obj["vehicle"],
-            data_obj["data"]["station"],
-            data_obj["data"]["track"],
+            data_obj["station"],
+            data_obj["track"],
             json.dumps(data_obj["data"], default=str),
         ),
     },
