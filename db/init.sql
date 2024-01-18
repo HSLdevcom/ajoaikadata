@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS stationevents (
     vehicle_id INT NOT NULL,
     station TEXT NOT NULL,
     track TEXT NOT NULL,
-    direction TEXT,
+    direction TEXT NOT NULL,
     data JSONB NOT NULL,
     PRIMARY KEY (ntp_timestamp, vehicle_id)
 );
