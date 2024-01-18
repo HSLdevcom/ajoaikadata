@@ -50,8 +50,8 @@ class UDPState(TypedDict):
 
 class StationState(TypedDict):
     station: str | None
-    track: int | None
-    direction: int | None
+    track: str | None
+    direction: str | None
     event: str | None
     last_updated: datetime | None
 

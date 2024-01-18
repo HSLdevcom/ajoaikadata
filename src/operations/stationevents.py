@@ -16,7 +16,7 @@ VehicleState: TypeAlias = dict[str, Any]
 class StationStateCache(TypedDict):
     station: str | None
     track: int | None
-    direction: int | None
+    direction: str | None
     time_arrived: datetime | None
     time_doors_last_closed: datetime | None
     time_departed: datetime | None
@@ -28,12 +28,12 @@ class StationEvent(TypedDict):
     ntp_timestamp: Any
     station: str
     track: int
-    direction: int | None
+    direction: str | None
     data: Any
 
 
 def _create_event(data: Event, station_state: StationStateCache) -> StationEvent | None:
-    if not station_state["station"] or not station_state["track"]:
+    if not station_state["station"] or not station_state["track"] or not (station_state["time_arrived"] or station_state["time_departed"]):
         return None
 
     return {
@@ -86,6 +86,7 @@ def create_station_events(
             last_station_state["arrival_vehicle_state"] = vehicle_state
             last_station_state["station"] = data["data"]["station"]
             last_station_state["track"] = data["data"]["track"]
+            last_station_state["direction"] = data["data"]["direction"]
 
         case "stopped":
             # Update arrival time. If doors were not opened, override the value.
@@ -107,9 +108,11 @@ def create_station_events(
         case "departure":
             # release the event
             # update first the station state if it's still missing (that's the case when the vehicle is leaving from the first station)
-            if not last_station_state["station"] or not last_station_state["track"]:
+            if not last_station_state["station"] or not last_station_state["track"] or not last_station_state["direction"]:
                 last_station_state["station"] = data["data"]["station"]
                 last_station_state["track"] = data["data"]["track"]
+                last_station_state["direction"] = data["data"]["direction"]
+
             if not last_station_state["arrival_vehicle_state"]:
                 last_station_state["arrival_vehicle_state"] = vehicle_state
             station_event_to_send = _create_event(data, last_station_state)
