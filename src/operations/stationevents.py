@@ -16,6 +16,7 @@ VehicleState: TypeAlias = dict[str, Any]
 class StationStateCache(TypedDict):
     station: str | None
     track: int | None
+    direction: int | None
     time_arrived: datetime | None
     time_doors_last_closed: datetime | None
     time_departed: datetime | None
@@ -27,6 +28,7 @@ class StationEvent(TypedDict):
     ntp_timestamp: Any
     station: str
     track: int
+    direction: int | None
     data: Any
 
 
@@ -39,6 +41,7 @@ def _create_event(data: Event, station_state: StationStateCache) -> StationEvent
         "ntp_timestamp": data["ntp_timestamp"],
         "station": station_state["station"],
         "track": station_state["track"],
+        "direction": station_state["direction"],
         # Data is the combination of the existing vehicle and selected keys of station states
         "data": (station_state["arrival_vehicle_state"] or {})
         | {
@@ -53,6 +56,7 @@ def create_empty_stationstate_cache() -> StationStateCache:
     return {
         "station": None,
         "track": None,
+        "direction": None,
         "time_arrived": None,
         "time_doors_last_closed": None,
         "time_departed": None,
@@ -121,7 +125,7 @@ def create_station_events(
             vehicle_state = vehicle_state | data["data"]
 
         case _:
-            logger.info(f"Unknown event type for station event: {data['event_type']}.")
+            pass
 
     if station_event_to_send:
         msg_out: AjoaikadataMsg = {"msgs": value.get("msgs", []), "data": station_event_to_send}

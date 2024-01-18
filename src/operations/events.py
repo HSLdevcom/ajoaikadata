@@ -50,7 +50,8 @@ class UDPState(TypedDict):
 
 class StationState(TypedDict):
     station: str | None
-    track: str | None
+    track: int | None
+    direction: int | None
     event: str | None
     last_updated: datetime | None
 
@@ -88,7 +89,7 @@ def create_empty_state() -> VehicleState:
             "all_vehicles": None,
             "last_updated": None,
         },
-        {"station": None, "track": None, "event": None, "last_updated": None},
+        {"station": None, "track": None, "direction":None,"event": None, "last_updated": None},
     )
 
 
@@ -137,11 +138,14 @@ def _check_station_event(last_state: StationState, data: dict) -> Tuple[StationS
     if not balise_data:
         # Early return if balise didn't exist in the registry
         return last_state, None
+    
+    event_msg_data = {"station": balise_data["station"], "track": balise_data["track"], "direction": balise_data["train_direction"], "triggered_by": balise_key}
 
     # check if any of the fields has changed
     if (
         last_state["station"] != balise_data["station"]
         or last_state["track"] != balise_data["track"]
+        or last_state["direction"] != balise_data["train_direction"]
         or last_state["event"] != balise_data["type"].lower()
     ):
         if last_state["last_updated"] and ntp_timestamp < last_state["last_updated"]:
@@ -151,14 +155,15 @@ def _check_station_event(last_state: StationState, data: dict) -> Tuple[StationS
         # if changed, update last_station_event data and send event
         last_state["station"] = balise_data["station"]
         last_state["track"] = balise_data["track"]
+        last_state["direction"] = balise_data["train_direction"]
         last_state["event"] = balise_data["type"].lower()
         last_state["last_updated"] = ntp_timestamp
 
-        event_msg_data = {"station": balise_data["station"], "track": balise_data["track"], "triggered_by": balise_key}
 
         return last_state, _create_event(data, balise_data["type"].lower(), event_msg_data)
 
-    return last_state, None
+    # Balise found but nothing needed to be updated. Send event for debuggin purposes.
+    return last_state, _create_event(data, f"{balise_data['type'].lower()}_debug", event_msg_data)
 
 
 def create_events(state: VehicleState, value: AjoaikadataMsg) -> tuple[VehicleState, AjoaikadataMsg]:

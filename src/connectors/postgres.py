@@ -60,11 +60,11 @@ PG_TARGET_TABLE = {
         ),
     },
     "stationevents": {
-        "query": SQL("COPY staging.{staging} (ntp_timestamp, vehicle_id, station, track, data) FROM STDIN;"),
+        "query": SQL("COPY staging.{staging} (ntp_timestamp, vehicle_id, station, track, direction, data) FROM STDIN;"),
         "post_query": SQL(
             """
-            INSERT INTO stationevents (ntp_timestamp, vehicle_id, station, track, data)
-            SELECT ntp_timestamp, vehicle_id, station, track, data FROM staging.{staging} ON CONFLICT DO NOTHING;
+            INSERT INTO stationevents (ntp_timestamp, vehicle_id, station, track, direction, data)
+            SELECT ntp_timestamp, vehicle_id, station, track, direction, data FROM staging.{staging} ON CONFLICT DO NOTHING;
             DELETE FROM staging.{staging};
             """
         ),
@@ -73,6 +73,7 @@ PG_TARGET_TABLE = {
             data_obj["vehicle"],
             data_obj["station"],
             data_obj["track"],
+            data_obj["direction"],
             json.dumps(data_obj["data"], default=str),
         ),
     },
