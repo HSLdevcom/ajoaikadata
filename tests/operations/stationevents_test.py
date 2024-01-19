@@ -1055,7 +1055,7 @@ def test_arrival_station():
             "direction": "2",
             "data": {
                 "time_arrived": datetime(2024, 1, 1, 0, 1, 1),
-                "time_doors_last_closed": datetime(2024, 1, 1, 0, 1, 3),
+                "time_doors_last_closed": None, # Not recorded on the last station
                 "time_departed": None,
             },
         },
@@ -1117,7 +1117,7 @@ def test_late_balise_events():
         # HERE!
         {
             "vehicle": 12,
-            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 0),
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 0),
             "event_type": "arrival",
             "data": {"track": "4", "station": "Ilmala asema", "direction": "1"},
         },
@@ -1290,7 +1290,7 @@ def test_late_balise_events2():
         # HERE!
         {
             "vehicle": 12,
-            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 0),
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 0),
             "event_type": "arrival",
             "data": {"track": "4", "station": "Ilmala asema", "direction": "1"},
         },
@@ -1365,6 +1365,305 @@ def test_late_balise_events2():
             "direction": "1",
             "data": {
                 "time_arrived": datetime(2024, 1, 1, 0, 1, 1),
+                "time_doors_last_closed": datetime(2024, 1, 1, 0, 1, 3),
+                "time_departed": datetime(2024, 1, 1, 0, 1, 4),
+            },
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 5),
+            "station": "Huopalahti",
+            "track": "4",
+            "direction": "1",
+            "data": {
+                "time_arrived": datetime(2024, 1, 1, 0, 2, 1),
+                "time_doors_last_closed": datetime(2024, 1, 1, 0, 2, 3),
+                "time_departed": datetime(2024, 1, 1, 0, 2, 4),
+            },
+        },
+    ]
+
+
+def test_late_balise_tst_validation():
+    """Late balise event is validated and refuced, if the timestamp does not match."""
+    input_data = [
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 0),
+            "event_type": "arrival",
+            "data": {"track": "11", "station": "Pasila asema", "direction": "1"},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 1),
+            "event_type": "stopped",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 2),
+            "event_type": "doors_opened",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 3),
+            "event_type": "doors_closed",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 4),
+            "event_type": "moving",
+            "data": {},
+        },
+        # Now happens something. Departure is missing and we already get info from the next stop.
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 1),
+            "event_type": "stopped",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 2),
+            "event_type": "doors_opened",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 3),
+            "event_type": "doors_closed",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 4),
+            "event_type": "moving",
+            "data": {},
+        },
+        # Oh no, it comes here. The data will be messed up.
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 5),
+            "event_type": "departure",
+            "data": {"track": "11", "station": "Pasila asema", "direction": "1"},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 0),
+            "event_type": "arrival",
+            "data": {"track": "4", "station": "Ilmala asema", "direction": "1"},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 5),
+            "event_type": "departure",
+            "data": {"track": "4", "station": "Ilmala asema", "direction": "1"},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 0),
+            "event_type": "arrival",
+            "data": {"track": "4", "station": "Huopalahti", "direction": "1"},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 1),
+            "event_type": "stopped",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 2),
+            "event_type": "doors_opened",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 3),
+            "event_type": "doors_closed",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 4),
+            "event_type": "moving",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 5),
+            "event_type": "departure",
+            "data": {"track": "4", "station": "Huopalahti", "direction": "1"},
+        },
+    ]
+    input_msgs: list[AjoaikadataMsgWithKey] = [("12", {"data": d}) for d in input_data]
+    result: list[AjoaikadataMsgWithKey] = []
+    flow = get_test_flow(input_msgs, result)
+    run_main(flow)
+
+    test_result = [v["data"] for k, v in result]
+
+    assert test_result == [
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 5),
+            "station": "Ilmala asema",
+            "track": "4",
+            "direction": "1",
+            "data": {
+                "time_arrived": None, # The recorded value was before arrival signal and should be discarded
+                "time_doors_last_closed": datetime(2024, 1, 1, 0, 1, 3),
+                "time_departed": datetime(2024, 1, 1, 0, 1, 4),
+            },
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 5),
+            "station": "Huopalahti",
+            "track": "4",
+            "direction": "1",
+            "data": {
+                "time_arrived": datetime(2024, 1, 1, 0, 2, 1),
+                "time_doors_last_closed": datetime(2024, 1, 1, 0, 2, 3),
+                "time_departed": datetime(2024, 1, 1, 0, 2, 4),
+            },
+        },
+    ]
+
+
+def test_late_balise_tst_validation2():
+    """Late balise event is validated and refuced, if the timestamp does not match."""
+    input_data = [
+        # No arrival
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 1),
+            "event_type": "stopped",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 2),
+            "event_type": "doors_opened",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 3),
+            "event_type": "doors_closed",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 4),
+            "event_type": "moving",
+            "data": {},
+        },
+        # This is already the second stop, we missed the first one completely...
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 1),
+            "event_type": "stopped",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 2),
+            "event_type": "doors_opened",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 3),
+            "event_type": "doors_closed",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 4),
+            "event_type": "moving",
+            "data": {},
+        },
+        # Here they come!
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 0),
+            "event_type": "arrival",
+            "data": {"track": "11", "station": "Pasila asema", "direction": "1"},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 0, 5),
+            "event_type": "departure",
+            "data": {"track": "11", "station": "Pasila asema", "direction": "1"},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 0),
+            "event_type": "arrival",
+            "data": {"track": "4", "station": "Ilmala asema", "direction": "1"},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 5),
+            "event_type": "departure",
+            "data": {"track": "4", "station": "Ilmala asema", "direction": "1"},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 0),
+            "event_type": "arrival",
+            "data": {"track": "4", "station": "Huopalahti", "direction": "1"},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 1),
+            "event_type": "stopped",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 2),
+            "event_type": "doors_opened",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 3),
+            "event_type": "doors_closed",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 4),
+            "event_type": "moving",
+            "data": {},
+        },
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 2, 5),
+            "event_type": "departure",
+            "data": {"track": "4", "station": "Huopalahti", "direction": "1"},
+        },
+    ]
+    input_msgs: list[AjoaikadataMsgWithKey] = [("12", {"data": d}) for d in input_data]
+    result: list[AjoaikadataMsgWithKey] = []
+    flow = get_test_flow(input_msgs, result)
+    run_main(flow)
+
+    test_result = [v["data"] for k, v in result]
+
+    assert test_result == [
+        {
+            "vehicle": 12,
+            "ntp_timestamp": datetime(2024, 1, 1, 0, 1, 5),
+            "station": "Ilmala asema",
+            "track": "4",
+            "direction": "1",
+            "data": {
+                "time_arrived": None, # The recorded value was before arrival signal and should be discarded
                 "time_doors_last_closed": datetime(2024, 1, 1, 0, 1, 3),
                 "time_departed": datetime(2024, 1, 1, 0, 1, 4),
             },

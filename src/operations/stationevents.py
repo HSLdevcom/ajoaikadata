@@ -32,13 +32,31 @@ class StationEvent(TypedDict):
     data: Any
 
 
-def _create_event(data: Event, station_state: StationStateCache) -> StationEvent | None:
+def _create_event(data: Event, station_state: StationStateCache, trigger_time: datetime) -> StationEvent | None:
+    # Station should have track information and either arrival or departure time.
     if (
         not station_state["station"]
         or not station_state["track"]
         or not station_state["direction"]
         or not (station_state["time_arrived"] or station_state["time_departed"])
     ):
+        return None
+
+    # Ensure the trigger timestamp is always greater than other timestamps.
+    tsts = [station_state[tst] for tst in ("time_arrived", "time_doors_last_closed", "time_departed")]
+    if any([trigger_time.timestamp() - (tst.timestamp() if tst else 0) < 0 for tst in tsts]):
+        print(trigger_time)
+        print(
+            [trigger_time],
+            [
+                trigger_time.timestamp() - station_state.get(tst, datetime.fromtimestamp(0)).timestamp()
+                for tst in ("time_arrived", "time_doors_last_closed", "time_departed")
+            ],
+            [
+                trigger_time.timestamp() - station_state.get(tst, datetime.fromtimestamp(0)).timestamp() < 0
+                for tst in ("time_arrived", "time_doors_last_closed", "time_departed")
+            ],
+        )
         return None
 
     return {
@@ -84,17 +102,26 @@ def create_station_events(
 
     match data["event_type"]:
         case "arrival":
-            # Init station and track. Send event if it wasn't released yet.
-            if any(last_station_state.values()):
-                station_event_to_send = _create_event(data, last_station_state)
-                last_station_state = create_empty_stationstate_cache()
+            # Init station and track. Send event if the existing station was there (means we didn't receive the departure event.)
+            if last_station_state["station"]:
+                station_event_to_send = _create_event(data, last_station_state, data["ntp_timestamp"])
+                # Clear cache only if event will be sent.
+                if station_event_to_send:
+                    last_station_state = create_empty_stationstate_cache()
+
             last_station_state["arrival_vehicle_state"] = vehicle_state
             last_station_state["station"] = data["data"]["station"]
             last_station_state["track"] = data["data"]["track"]
             last_station_state["direction"] = data["data"]["direction"]
 
+            # Override the values that are earlier than the event.
+            for tst_field in ("time_arrived", "time_doors_last_closed", "time_departed"):
+                tst = last_station_state[tst_field]
+                if tst and tst.timestamp() < data["ntp_timestamp"].timestamp():
+                    last_station_state[tst_field] = None
+
         case "stopped":
-            # Update arrival time. If doors were not opened, override the value.
+            # Update arrival time. If doors were not opened or station is missing, override the value.
             if not last_station_state.get("time_arrived") or not last_station_state.get("time_doors_last_closed"):
                 last_station_state["time_arrived"] = data["ntp_timestamp"]
 
@@ -124,13 +151,16 @@ def create_station_events(
 
             if not last_station_state["arrival_vehicle_state"]:
                 last_station_state["arrival_vehicle_state"] = vehicle_state
-            station_event_to_send = _create_event(data, last_station_state)
-            last_station_state = create_empty_stationstate_cache()
+            station_event_to_send = _create_event(data, last_station_state, data["ntp_timestamp"])
+            if station_event_to_send:
+                last_station_state = create_empty_stationstate_cache()
 
         case "cabin_changed":
-            # Train has stopped and probably will change the direction. Release the message.
+            # Train has stopped and probably will change the direction. Release the message. Never send doors / departed time.
             vehicle_state = vehicle_state | data["data"]
-            station_event_to_send = _create_event(data, last_station_state)
+            last_station_state["time_departed"] = None
+            last_station_state["time_doors_last_closed"] = None
+            station_event_to_send = _create_event(data, last_station_state, data["ntp_timestamp"])
             last_station_state = create_empty_stationstate_cache()
 
         case "train_no_changed" | "vehicle_count_changed" | "vehicle_ids_changed":
