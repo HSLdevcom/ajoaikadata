@@ -13,6 +13,7 @@ services:
       - START_DATE=${START_DATE}
       - END_DATE=${END_DATE}
       - POSTGRES_CONN_STR=${POSTGRES_CONN_STR}
+      - BALISE_DATA_FILE=/bytewax/app/util/balise_registry.csv
     volumes:
       - ./src:/bytewax/app
       - ./data:/data

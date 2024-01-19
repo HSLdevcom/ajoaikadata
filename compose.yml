@@ -47,6 +47,7 @@ services:
       - PULSAR_CLIENT_NAME=eventcreator
       - PULSAR_INPUT_TOPIC=parsed
       - PULSAR_OUTPUT_TOPIC=events
+      - BALISE_DATA_FILE=/bytewax/app/util/balise_registry.csv
     volumes:
       - ./src:/bytewax/app
     depends_on:

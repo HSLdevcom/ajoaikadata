@@ -4,6 +4,12 @@
 61030,2,Aviapolis,1,ARRIVAL,1,false
 61833,1,Aviapolis,1,DEPARTURE,1,true
 61033,1,Aviapolis,1,DEPARTURE,1,false
+61732,2,Aviapolis,2,ARRIVAL,1,true
+61032,2,Aviapolis,2,ARRIVAL,1,false
+61832,2,Aviapolis,2,ARRIVAL,1,false
+61735,1,Aviapolis,2,DEPARTURE,1,true
+61035,1,Aviapolis,2,DEPARTURE,1,false
+61835,1,Aviapolis,2,DEPARTURE,1,false
 61735,2,Aviapolis,2,ARRIVAL,2,true
 61035,2,Aviapolis,2,ARRIVAL,2,false
 61835,2,Aviapolis,2,ARRIVAL,2,false
@@ -51,6 +57,9 @@
 10211,1,Helsinki asema,6,DEPARTURE,1,true
 10011,1,Helsinki asema,6,DEPARTURE,1,false
 10930,2,Helsinki asema,6,DEPARTURE,1,false
+10211,2,Helsinki asema,6,ARRIVAL,2,true
+10011,2,Helsinki asema,6,ARRIVAL,2,false
+10930,1,Helsinki asema,6,ARRIVAL,2,false
 10215,2,Helsinki asema,8,ARRIVAL,2,true
 10215,1,Helsinki asema,8,DEPARTURE,1,true
 10934,2,Helsinki asema,8,DEPARTURE,1,false
@@ -174,7 +183,7 @@
 11105,1,Jorvas,1,DEPARTURE,1,false
 11868,1,Jorvas,1,ARRIVAL,2,true
 11105,2,Jorvas,1,ARRIVAL,2,false
-11896,1,Jorvas,1,DEPARTURE,1,false
+11896,1,Jorvas,1,DEPARTURE,2,false
 11096,1,Jorvas,1,DEPARTURE,2,true
 11101,2,Jorvas,1,DEPARTURE,2,false
 11870,1,Jorvas,2,ARRIVAL,2,true
@@ -194,15 +203,17 @@
 11603,2,Kannelmäki,2,DEPARTURE,2,true
 11018,1,Kannelmäki,2,DEPARTURE,2,false
 11800,1,Kannelmäki,2,DEPARTURE,2,false
-11841,1,Kauklahti asema,1,ARRIVAL,1,true
-11826,2,Kauklahti asema,1,ARRIVAL,1,false
+11078,2,Kauklahti asema,1,ARRIVAL,1,true
 11775,1,Kauklahti asema,1,DEPARTURE,1,true
 11830,2,Kauklahti asema,1,DEPARTURE,1,false
 11075,1,Kauklahti asema,1,DEPARTURE,1,false
+11078,1,Kauklahti asema,1,DEPARTURE,2,true
 11077,2,Kauklahti asema,2,ARRIVAL,2,true
-11877,2,Kauklahti asema,2,ARRIVAL,2,false
 11076,1,Kauklahti asema,2,DEPARTURE,2,true
 11843,2,Kauklahti asema,2,DEPARTURE,2,false
+11076,2,Kauklahti asema,2,ARRIVAL,1,true
+11843,1,Kauklahti asema,2,ARRIVAL,1,false
+11077,1,Kauklahti asema,2,DEPARTURE,1,true
 11816,2,Kauniainen,1,ARRIVAL,1,true
 11044,2,Kauniainen,1,ARRIVAL,1,false
 11560,2,Kauniainen,1,ARRIVAL,1,false
@@ -219,7 +230,6 @@
 11038,2,Kera,1,ARRIVAL,1,false
 11741,1,Kera,1,DEPARTURE,1,true
 11041,1,Kera,1,DEPARTURE,1,false
-11814,1,Kera,2,ARRIVAL,2,true
 11043,2,Kera,2,ARRIVAL,2,false
 11740,1,Kera,2,DEPARTURE,2,true
 11040,1,Kera,2,DEPARTURE,2,false
@@ -237,7 +247,6 @@
 11737,1,Kilo,1,DEPARTURE,1,true
 11810,2,Kilo,1,DEPARTURE,1,false
 11037,1,Kilo,1,DEPARTURE,1,false
-11736,1,Kilo,2,ARRIVAL,2,true
 11039,2,Kilo,2,ARRIVAL,2,false
 11563,2,Kilo,2,ARRIVAL,2,false
 11036,1,Kilo,2,DEPARTURE,2,true
@@ -246,18 +255,20 @@
 11112,2,Kirkkonummi,1,ARRIVAL,1,true
 9344,2,Kirkkonummi,1,ARRIVAL,1,false
 11576,2,Kirkkonummi,1,ARRIVAL,1,false
-11117,1,Kirkkonummi,1,DEPARTURE,1,true
 11112,1,Kirkkonummi,1,DEPARTURE,2,true
 9344,1,Kirkkonummi,1,DEPARTURE,2,false
+11117,1,Kirkkonummi,1,DEPARTURE,1,true
 11880,2,Kirkkonummi,1,DEPARTURE,1,false
 11717,1,Kirkkonummi,1,DEPARTURE,1,false
+11117,2,Kirkkonummi,1,ARRIVAL,2,true
+11880,1,Kirkkonummi,1,ARRIVAL,2,false
+11717,2,Kirkkonummi,1,ARRIVAL,2,false
 11114,2,Kirkkonummi,2,ARRIVAL,1,true
 11114,1,Kirkkonummi,2,DEPARTURE,2,true
 11119,1,Kirkkonummi,2,DEPARTURE,1,true
 11882,2,Kirkkonummi,2,DEPARTURE,1,false
 11119,2,Kirkkonummi,2,ARRIVAL,2,true
 11882,1,Kirkkonummi,2,ARRIVAL,2,false
-9342,1,Kirkkonummi,2,DEPARTURE,2,true
 11116,2,Kirkkonummi,3,ARRIVAL,1,true
 11116,1,Kirkkonummi,3,DEPARTURE,2,true
 61710,2,Kivistö,1,ARRIVAL,1,true
@@ -265,6 +276,11 @@
 61810,2,Kivistö,1,ARRIVAL,1,false
 61813,2,Kivistö,1,DEPARTURE,1,true
 61525,1,Kivistö,1,DEPARTURE,1,false
+61813,1,Kivistö,1,ARRIVAL,2,true
+61525,2,Kivistö,1,ARRIVAL,2,false
+61710,1,Kivistö,1,DEPARTURE,2,true
+61010,1,Kivistö,1,DEPARTURE,2,false
+61810,1,Kivistö,1,DEPARTURE,2,false
 61715,2,Kivistö,2,ARRIVAL,2,true
 61527,2,Kivistö,2,ARRIVAL,2,false
 61815,2,Kivistö,2,ARRIVAL,2,false
@@ -279,8 +295,8 @@
 11056,1,Koivuhovi,2,ARRIVAL,2,false
 11752,1,Koivuhovi,2,DEPARTURE,2,true
 11055,2,Koivuhovi,2,DEPARTURE,2,false
-13871,1,Koivukylä,3,ARRIVAL,1,true
-13786,2,Koivukylä,3,ARRIVAL,1,false
+13520,2,Koivukylä,3,ARRIVAL,1,false
+13786,2,Koivukylä,3,ARRIVAL,1,true
 13239,1,Koivukylä,3,DEPARTURE,1,true
 13875,1,Koivukylä,3,DEPARTURE,1,false
 13877,2,Koivukylä,4,ARRIVAL,2,true
@@ -305,21 +321,31 @@
 9467,2,Käpylä,4,ARRIVAL,2,false
 13006,1,Käpylä,4,DEPARTURE,2,true
 10346,1,Käpylä,4,DEPARTURE,2,false
-61746,2,Leinelä,1,ARRIVAL,2,true
-61046,2,Leinelä,1,ARRIVAL,2,false
-61531,1,Leinelä,1,DEPARTURE,2,true
-61049,1,Leinelä,1,DEPARTURE,2,false
-61509,1,Leinelä,1,DEPARTURE,2,false
-61051,2,Leinelä,2,ARRIVAL,1,true
-61511,2,Leinelä,2,ARRIVAL,1,false
-61048,1,Leinelä,2,DEPARTURE,1,true
-61744,1,Leinelä,2,DEPARTURE,1,false
+61746,2,Leinelä,1,ARRIVAL,1,true
+61046,2,Leinelä,1,ARRIVAL,1,false
+61531,1,Leinelä,1,DEPARTURE,1,true
+61049,1,Leinelä,1,DEPARTURE,1,false
+61509,1,Leinelä,1,DEPARTURE,1,false
+61048,2,Leinelä,2,ARRIVAL,1,true
+61744,2,Leinelä,2,ARRIVAL,1,false
+61051,1,Leinelä,2,DEPARTURE,1,true
+61511,1,Leinelä,2,DEPARTURE,1,false
+61051,2,Leinelä,2,ARRIVAL,2,true
+61511,2,Leinelä,2,ARRIVAL,2,false
+61048,1,Leinelä,2,DEPARTURE,2,true
+61744,1,Leinelä,2,DEPARTURE,2,false
 61734,2,Lentoasema,1,ARRIVAL,1,true
 61834,2,Lentoasema,1,ARRIVAL,1,false
 61034,2,Lentoasema,1,ARRIVAL,1,false
 61737,1,Lentoasema,1,DEPARTURE,1,true
 61037,1,Lentoasema,1,DEPARTURE,1,false
 61837,1,Lentoasema,1,DEPARTURE,1,false
+61737,2,Lentoasema,1,ARRIVAL,2,true
+61037,2,Lentoasema,1,ARRIVAL,2,false
+61837,2,Lentoasema,1,ARRIVAL,2,false
+61734,1,Lentoasema,1,DEPARTURE,2,true
+61834,1,Lentoasema,1,DEPARTURE,2,false
+61034,1,Lentoasema,1,DEPARTURE,2,false
 61739,2,Lentoasema,2,ARRIVAL,2,true
 61839,2,Lentoasema,2,ARRIVAL,2,false
 61039,2,Lentoasema,2,ARRIVAL,2,false
@@ -336,6 +362,8 @@
 11772,1,Leppävaara,2,DEPARTURE,2,false
 11142,1,Leppävaara,3,DEPARTURE,1,true
 11628,1,Leppävaara,3,DEPARTURE,1,false
+11142,2,Leppävaara,3,ARRIVAL,2,true
+11628,2,Leppävaara,3,ARRIVAL,2,false
 11631,1,Leppävaara,4,ARRIVAL,1,true
 11767,2,Leppävaara,4,ARRIVAL,1,false
 11769,2,Leppävaara,4,ARRIVAL,1,false
@@ -416,6 +444,12 @@
 13711,1,Oulunkylä,3,DEPARTURE,1,true
 13508,2,Oulunkylä,3,DEPARTURE,1,false
 13027,1,Oulunkylä,3,DEPARTURE,1,false
+13711,2,Oulunkylä,3,ARRIVAL,2,true
+13508,1,Oulunkylä,3,ARRIVAL,2,false
+13027,2,Oulunkylä,3,ARRIVAL,2,false
+13314,1,Oulunkylä,3,DEPARTURE,2,true
+13504,1,Oulunkylä,3,DEPARTURE,2,false
+13014,1,Oulunkylä,3,DEPARTURE,2,false
 13713,2,Oulunkylä,4,ARRIVAL,2,true
 13029,2,Oulunkylä,4,ARRIVAL,2,false
 13704,1,Oulunkylä,4,DEPARTURE,2,true
@@ -438,6 +472,12 @@
 10319,1,Pasila asema,8,DEPARTURE,1,true
 10607,1,Pasila asema,8,DEPARTURE,1,false
 10119,1,Pasila asema,8,DEPARTURE,1,false
+10319,2,Pasila asema,8,DEPARTURE,2,true
+10607,2,Pasila asema,8,DEPARTURE,2,false
+10119,2,Pasila asema,8,DEPARTURE,2,false
+10846,1,Pasila asema,8,ARRIVAL,2,true
+10046,1,Pasila asema,8,ARRIVAL,2,false
+10542,1,Pasila asema,8,ARRIVAL,2,false
 10421,1,Pasila asema,9,ARRIVAL,2,true
 10121,2,Pasila asema,9,ARRIVAL,2,false
 10609,2,Pasila asema,9,ARRIVAL,2,false
@@ -459,8 +499,7 @@
 10861,2,Pasila asema,11,ARRIVAL,2,true
 10623,2,Pasila asema,11,ARRIVAL,2,false
 10061,2,Pasila asema,11,ARRIVAL,2,false
-10870,1,Pasila asema,11,DEPARTURE,2,true
-10070,1,Pasila asema,11,DEPARTURE,2,false
+10761,2,Pasila asema,11,DEPARTURE,2,true
 11730,2,Pitäjänmäki,3,ARRIVAL,2,true
 11426,1,Pitäjänmäki,3,DEPARTURE,2,true
 11126,1,Pitäjänmäki,3,DEPARTURE,2,false
@@ -485,6 +524,12 @@
 13753,1,Puistola,3,DEPARTURE,1,true
 13763,1,Puistola,3,DEPARTURE,1,false
 13204,2,Puistola,3,DEPARTURE,1,false
+13748,2,Puistola,4,ARRIVAL,1,true
+13207,1,Puistola,4,ARRIVAL,1,false
+13130,2,Puistola,4,ARRIVAL,1,false
+13755,1,Puistola,4,DEPARTURE,1,true
+13206,2,Puistola,4,DEPARTURE,1,false
+13761,1,Puistola,4,DEPARTURE,1,false
 13755,2,Puistola,4,ARRIVAL,2,true
 13206,1,Puistola,4,ARRIVAL,2,false
 13761,2,Puistola,4,ARRIVAL,2,false
@@ -536,6 +581,11 @@
 13129,1,Tapanila,3,DEPARTURE,1,true
 13503,1,Tapanila,3,DEPARTURE,1,false
 13128,2,Tapanila,3,DEPARTURE,1,false
+13736,2,Tapanila,4,ARRIVAL,1,true
+13122,2,Tapanila,4,ARRIVAL,1,false
+9560,2,Tapanila,4,ARRIVAL,1,false
+13505,1,Tapanila,4,DEPARTURE,1,false
+13131,1,Tapanila,4,DEPARTURE,1,false
 13822,1,Tapanila,4,ARRIVAL,2,true
 13505,2,Tapanila,4,ARRIVAL,2,false
 13131,2,Tapanila,4,ARRIVAL,2,false
@@ -558,6 +608,10 @@
 11104,2,Tolsa,1,ARRIVAL,1,false
 11713,1,Tolsa,1,DEPARTURE,1,true
 11876,2,Tolsa,1,DEPARTURE,1,false
+11713,2,Tolsa,1,ARRIVAL,2,true
+11876,1,Tolsa,1,ARRIVAL,2,false
+11704,1,Tolsa,1,DEPARTURE,2,true
+11104,1,Tolsa,1,DEPARTURE,2,false
 11706,2,Tolsa,2,ARRIVAL,1,true
 11106,2,Tolsa,2,ARRIVAL,1,false
 11879,1,Tolsa,2,DEPARTURE,1,true
