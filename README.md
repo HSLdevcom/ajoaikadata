@@ -33,6 +33,8 @@ The tested versions are:
 - [`src/ekeparser`](./src/ekeparser): Module to parse EKE's binary messages to human readable format.
 - [`src/util`](./src/util): Other related code used in dataflows. The most notable module is balise_registry, which contains the manually selected mapping from balise id's to stations and tracks.
 
+- [`tests`](./tests/): Tests for the data flow and operations.
+
 ## Installation and running services
 
 In general, Bytewax applications are started with Bytewax.run command, like this:
@@ -119,3 +121,18 @@ Starting up the system:
 ```
 python run -m bytewax.run src.ajoaikadata
 ```
+
+## Running tests
+
+Install dependencies and pytest -package:
+```
+pip install -r requirements.txt
+pip install pytest
+```
+
+Run all tests:
+```
+pytest
+```
+
+Currently, there are a few tests created for dev purposes but the coverage is not yet good. Before going for production, more tests needs to be implemented.
