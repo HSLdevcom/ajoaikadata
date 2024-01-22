@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS messages (
     ntp_timestamp TIMESTAMPTZ NOT NULL,
+    eke_timestamp TIMESTAMPTZ NOT NULL,
     mqtt_timestamp TIMESTAMPTZ NOT NULL,
     msg_type INT NOT NULL,
     vehicle_id INT NOT NULL,
@@ -9,6 +10,7 @@ CREATE TABLE IF NOT EXISTS messages (
 
 CREATE TABLE IF NOT EXISTS events (
     ntp_timestamp TIMESTAMPTZ NOT NULL,
+    eke_timestamp TIMESTAMPTZ NOT NULL,
     mqtt_timestamp TIMESTAMPTZ NOT NULL,
     event_type TEXT NOT NULL,
     vehicle_id INT NOT NULL,
@@ -18,6 +20,7 @@ CREATE TABLE IF NOT EXISTS events (
 
 CREATE TABLE IF NOT EXISTS stationevents (
     ntp_timestamp TIMESTAMPTZ NOT NULL,
+    eke_timestamp TIMESTAMPTZ NOT NULL,
     vehicle_id INT NOT NULL,
     station TEXT NOT NULL,
     track TEXT NOT NULL,

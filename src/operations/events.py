@@ -62,6 +62,7 @@ VehicleState: TypeAlias = tuple[UDPState, StationState]
 class Event(TypedDict):
     vehicle: int
     ntp_timestamp: datetime
+    eke_timestamp: datetime
     mqtt_timestamp: datetime
     event_type: str
     data: dict
@@ -71,6 +72,7 @@ def _create_event(data: dict, event_type: str, event_data: dict) -> Event:
     return {
         "vehicle": data["vehicle"],
         "ntp_timestamp": data["ntp_timestamp"],
+        "eke_timestamp": data["eke_timestamp"],
         "mqtt_timestamp": data["mqtt_timestamp"],
         "event_type": event_type,
         "data": event_data,

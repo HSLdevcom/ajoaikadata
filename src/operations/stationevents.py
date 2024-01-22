@@ -26,6 +26,7 @@ class StationStateCache(TypedDict):
 class StationEvent(TypedDict):
     vehicle: Any
     ntp_timestamp: Any
+    eke_timestamp: Any
     station: str
     track: int
     direction: str
@@ -45,23 +46,12 @@ def _create_event(data: Event, station_state: StationStateCache, trigger_time: d
     # Ensure the trigger timestamp is always greater than other timestamps.
     tsts = [station_state[tst] for tst in ("time_arrived", "time_doors_last_closed", "time_departed")]
     if any([trigger_time.timestamp() - (tst.timestamp() if tst else 0) < 0 for tst in tsts]):
-        print(trigger_time)
-        print(
-            [trigger_time],
-            [
-                trigger_time.timestamp() - station_state.get(tst, datetime.fromtimestamp(0)).timestamp()
-                for tst in ("time_arrived", "time_doors_last_closed", "time_departed")
-            ],
-            [
-                trigger_time.timestamp() - station_state.get(tst, datetime.fromtimestamp(0)).timestamp() < 0
-                for tst in ("time_arrived", "time_doors_last_closed", "time_departed")
-            ],
-        )
         return None
 
     return {
         "vehicle": data["vehicle"],
         "ntp_timestamp": data["ntp_timestamp"],
+        "eke_timestamp": data["eke_timestamp"],
         "station": station_state["station"],
         "track": station_state["track"],
         "direction": station_state["direction"],

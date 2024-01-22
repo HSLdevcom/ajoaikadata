@@ -18,6 +18,7 @@ def csv_to_bytewax_msg(value) -> AjoaikadataMsgWithKey:
         "topic": topic_name,
         "vehicle": vehicle,
         "mqtt_timestamp": value["mqtt_timestamp"],
+        "eke_timestamp": value["eke_timestamp"]
     }
     return vehicle, {"data": data}
 
