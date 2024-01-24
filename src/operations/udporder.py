@@ -18,8 +18,8 @@ UNEXPECTED_TIME_DIFF = 30
 # Tuple structure for Ajoaikadata msg comparison
 # Needed, because tuples can't be compared, if timestamps are the same. (Dicts are not comparable.)
 class UDPCacheItem(tuple):
-    def __new__(cls, key: datetime, value: AjoaikadataMsg):
-        return tuple.__new__(UDPCacheItem, (key, value))
+    def __new__(cls, item: tuple[datetime, AjoaikadataMsg]):
+        return tuple.__new__(UDPCacheItem, item)
 
     def __lt__(self, other):  # To override > operator
         return self[0] < other[0]
@@ -93,7 +93,7 @@ def reorder_messages(udp_cache: UDPMsgCache, value: AjoaikadataMsg) -> tuple[UDP
         or (len(udp_cache["msgs"]) > 0 and tst > udp_cache["msgs"][0][0])
     ):
         # Not the message we are waiting for. Store to the cache.
-        msgs = _add_to_cache(udp_cache, UDPCacheItem(tst, value))
+        msgs = _add_to_cache(udp_cache, UDPCacheItem((tst, value)))
         return udp_cache, msgs
 
     # The message is okay and should be returned
