@@ -1,5 +1,6 @@
 """
 Operations related to combine balise message parts into one.
+# TODO: The order could be resolved already in udporder -module and the cache could be removed?
 """
 from typing import TypeAlias
 
@@ -53,7 +54,7 @@ def combine_balise_parts(
     # Get the index of the other part of the message. Msg index is the loop of int between 1-255.
     # Note the "or" to change 0 to 1 or 255, because 0 is not used as an index.
     # Depending on the part, the next line gets either next or previous index.
-    msg_index_pair = msg_index + 1 & 255 or 1 if msg_part == 0 else msg_index - 1 & 255 or 255
+    msg_index_pair = (msg_index + 1) % 256 or 1 if msg_part == 0 else (msg_index - 1) % 256 or 255
 
     paired_data = parts_cache[msg_index_pair]
 
