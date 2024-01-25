@@ -33,42 +33,40 @@ stream = op.input("reader_in", flow, AzureStorageInput())
 
 stream = op.map("csv_to_bytewax_msg", stream, csv_to_bytewax_msg)
 
-stream = op.stateful_map("deduplicate", stream, create_deduplication_cache, deduplicate)
-stream = op.filter_map("filter_none", stream, filter_none)
-
-
-eke_stream = op.map("raw_msg_to_eke", bytewax_msg_stream, raw_msg_to_eke)
-eke_stream = op.filter_map("filter_none_raw_msg_to_eke", eke_stream, filter_none)
-
-eke_stream = op.stateful_map("reorder_upd", eke_stream, lambda: create_empty_udp_cache(), reorder_messages)
-eke_stream = op.flat_map_value("flat_ordered_msgs", eke_stream, lambda x: x)
-
-eke_stream_with_balises = op.stateful_map(
-    "combine_balises", eke_stream, lambda: create_empty_parts_cache(), combine_balise_parts
+stream = op.stateful_map("deduplicate", stream, create_deduplication_cache, deduplicate).then(
+    op.filter_map, "filter_none_deduplicate", filter_none
 )
-eke_stream_with_balises = op.filter_map("filter_none_combine_balises", eke_stream_with_balises, filter_none)
 
-eke_stream_complete = op.stateful_map(
-    "balise_direction", eke_stream_with_balises, lambda: create_empty_balise_cache(), create_directions_for_balises
+stream = op.map("raw_msg_to_eke", stream, raw_msg_to_eke).then(op.filter_map, "filter_none_raw_msg_to_eke", filter_none)
+
+stream = op.stateful_map("reorder_upd", stream, lambda: create_empty_udp_cache(), reorder_messages).then(
+    op.flat_map_value, "flatten_reorder_upd", lambda x: x
 )
-eke_stream_with_balises_dirs = op.filter_map("filter_none_balise_direction", eke_stream_complete, filter_none)
 
-op.output("contentparser_out", eke_stream_with_balises_dirs, PostgresOutput(postgres_client_messages))
+stream = op.stateful_map("combine_balises", stream, lambda: create_empty_parts_cache(), combine_balise_parts).then(
+    op.filter_map, "filter_none_combine_balises", filter_none
+)
 
-event_stream = op.stateful_map(
+stream = op.stateful_map(
+    "balise_direction", stream, lambda: create_empty_balise_cache(), create_directions_for_balises
+).then(op.filter_map, "filter_none_balise_direction", filter_none)
+
+op.output("contentparser_out", stream, PostgresOutput(postgres_client_messages))
+
+stream = op.stateful_map(
     "event_creator",
-    eke_stream_with_balises_dirs,
+    stream,
     lambda: create_empty_state(),
     create_events,
-)
-event_stream = op.filter_map("filter_none_event_creator", event_stream, filter_none)
-op.output("events_out", event_stream, PostgresOutput(postgres_client_events))
+).then(op.filter_map, "filter_none_event_creator", filter_none)
 
-station_stream = op.stateful_map(
+op.output("events_out", stream, PostgresOutput(postgres_client_events))
+
+stream = op.stateful_map(
     "station_event_creator",
-    event_stream,
+    stream,
     lambda: init_vehicle_station_cache(),
     create_station_events,
-)
-station_stream = op.filter_map("station_combiner_filtered", station_stream, filter_none)
-op.output("stations_out", station_stream, PostgresOutput(postgres_client_stationevents))
+).then( op.filter_map, "filter_none_statioin_event_creator", filter_none)
+
+op.output("stations_out", stream, PostgresOutput(postgres_client_stationevents))
