@@ -10,7 +10,7 @@ from ..util.ajoaikadatamsg import AjoaikadataMsg
 from ..util.config import logger
 
 # How many messages can be stored in the cache.
-CACHE_MAX_SIZE = 600
+CACHE_MAX_SIZE = 1000
 # If last message was more than this amount of seconds late, do not release the message immidiately.
 UNEXPECTED_TIME_DIFF = 30
 
