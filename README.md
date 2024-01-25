@@ -68,9 +68,11 @@ POSTGRES_DB=postgres
 PULSAR_CONN_STR="pulsar://pulsar:6650"
 ```
 
-### With Pulsar (multiple microservices)
 
-Pulsar setup launches several Bytewax applications. The whole data pipeline of Ajoaikadata is splitted into a few logical parts, like reading the data, parsing the data, and analyzing events from the message stream. Pulsar is used as a messaging platform between micsoservices.
+
+### Without Pulsar (single dataflow)
+
+Application can be launched as a single dataflow, so that Pulsar is not needed. This is probably a better approach for batch processing, because the setup is lighter.
 
 Installation:
 ```
@@ -87,23 +89,25 @@ Shutdown:
 docker compose down
 ```
 
-### Without Pulsar (single dataflow)
 
-Application can be launched as a single dataflow, so that Pulsar is not needed. This is probably a better approach for batch processing, because the setup is lighter. The installation is similar, but at this time, give a new compose file as an parameter.
+### With Pulsar (multiple microservices)
+
+Pulsar setup launches several Bytewax applications. The whole data pipeline of Ajoaikadata is splitted into a few logical parts, like reading the data, parsing the data, and analyzing events from the message stream. Pulsar is used as a messaging platform between microservices. The installation is similar, but at this time, give a new compose file as an parameter.
+
 
 Installation:
 ```
-docker compose -f compose-wo-pulsar.yml build
+docker compose -f compose-with-pulsar.yml build
 ```
 
 Starting up the system:
 ```
-docker compose -f compose-wo-pulsar.yml up -d
+docker compose -f compose-with-pulsar.yml up -d
 ```
 
 Shutdown:
 ```
-docker compose -f compose-wo-pulsar.yml down
+docker compose -f compose-with-pulsar.yml down
 ```
 
 

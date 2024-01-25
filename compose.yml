@@ -2,106 +2,24 @@ version: "3.8"
 
 services:
 
-  reader:
+  ajoaikadata:
     build: .
+    
     environment:
-      - BYTEWAX_PYTHON_FILE_PATH=app.reader
-      - BYTEWAX_PYTHON_PARAMETERS=-w 6
+      - BYTEWAX_PYTHON_FILE_PATH=app.ajoaikadata
+      - BYTEWAX_PYTHON_PARAMETERS=-w 4
       - AZ_STORAGE_CONNECTION_STRING=${AZ_STORAGE_CONNECTION_STRING}
       - AZ_STORAGE_CONTAINER=${AZ_STORAGE_CONTAINER}
       - START_DATE=${START_DATE}
       - END_DATE=${END_DATE}
-      - PULSAR_CLIENT_NAME=reader
-      - PULSAR_OUTPUT_TOPIC=raw
-    volumes:
-      - ./src:/bytewax/app
-    depends_on:
-      pulsar:
-        condition: service_healthy
-      contentparser:
-        condition: service_started
-      messagesink:
-        condition: service_started
-      eventsink:
-        condition: service_started
-
-  contentparser:
-    build: .
-    environment:
-      - BYTEWAX_PYTHON_FILE_PATH=app.contentparser
-      - BYTEWAX_PYTHON_PARAMETERS=-w 10
-      - PULSAR_CLIENT_NAME=contentparser
-      - PULSAR_INPUT_TOPIC=raw
-      - PULSAR_OUTPUT_TOPIC=parsed
-    volumes:
-      - ./src:/bytewax/app
-    depends_on:
-      pulsar:
-        condition: service_healthy
-
-  eventcreator:
-    build: .
-    environment:
-      - BYTEWAX_PYTHON_FILE_PATH=app.eventcreator
-      - BYTEWAX_PYTHON_PARAMETERS=-w 1
-      - PULSAR_CLIENT_NAME=eventcreator
-      - PULSAR_INPUT_TOPIC=parsed
-      - PULSAR_OUTPUT_TOPIC=events
+      - POSTGRES_CONN_STR=${POSTGRES_CONN_STR}
       - BALISE_DATA_FILE=/bytewax/app/util/balise_registry.csv
     volumes:
       - ./src:/bytewax/app
+      - ./data:/data
     depends_on:
-      pulsar:
-        condition: service_healthy
-
-  messagesink:
-    build: .
-    environment:
-      - BYTEWAX_PYTHON_FILE_PATH=app.pgsink
-      - BYTEWAX_PYTHON_PARAMETERS=-w 1
-      - PULSAR_CLIENT_NAME=messagesink
-      - PULSAR_INPUT_TOPIC=parsed
-      - POSTGRES_CONN_STR=${POSTGRES_CONN_STR}
-      - POSTGRES_TARGET_TABLE=messages
-    volumes:
-      - ./src:/bytewax/app
-    depends_on:
-      pulsar:
-        condition: service_healthy
       db:
         condition: service_healthy
-
-  eventsink:
-    build: .
-    environment:
-      - BYTEWAX_PYTHON_FILE_PATH=app.pgsink
-      - BYTEWAX_PYTHON_PARAMETERS=-w 1
-      - PULSAR_CLIENT_NAME=eventsink
-      - PULSAR_INPUT_TOPIC=events
-      - POSTGRES_CONN_STR=${POSTGRES_CONN_STR}
-      - POSTGRES_TARGET_TABLE=events
-    volumes:
-      - ./src:/bytewax/app
-    depends_on:
-      pulsar:
-        condition: service_healthy
-      db:
-        condition: service_healthy
-
-  pulsar:
-    image: "apachepulsar/pulsar:3.1.1"
-    command: [ "bin/pulsar", "standalone" ]
-    volumes:
-      # - pulsardata:/pulsar/data
-      - pulsarconf:/pulsar/conf
-    ports:
-      - "6650:6650"
-      - "8080:8080"
-    healthcheck:
-      test: [ "CMD", "bin/pulsar-admin", "brokers", "healthcheck" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   db:
     image: "timescale/timescaledb-ha:pg15.4-ts2.11.2-all"
@@ -118,7 +36,3 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-volumes:
-  # pulsardata:
-  pulsarconf:
