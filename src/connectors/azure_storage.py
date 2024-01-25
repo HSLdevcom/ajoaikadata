@@ -9,6 +9,7 @@ import gzip
 from io import BytesIO
 import logging
 import re
+import time
 from typing import Any
 
 from bytewax.inputs import FixedPartitionedSource, StatefulSourcePartition, batch
@@ -51,9 +52,18 @@ def _readlines(files: Sequence[str]):
     with _get_container_client() as container:
         for file_name in files:
             with container.get_blob_client(file_name) as blob_client:
-                downloader = blob_client.download_blob()
-                stream = BytesIO()
-                downloader.readinto(stream)
+                while True:
+                    try:
+                        downloader = blob_client.download_blob()
+                        stream = BytesIO()
+                        downloader.readinto(stream)
+                    except Exception as e:
+                        logger.error(e)
+                        logger.error(f"Problem downloading blob {file_name}. Retrying in 10 seconds...")
+                        time.sleep(10)
+                        continue
+                    break
+                    
 
                 stream.seek(0)
                 f = gzip.open(stream, "rt", newline="")
