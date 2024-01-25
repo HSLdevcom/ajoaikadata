@@ -1,7 +1,7 @@
 """
 Operations related to create station events.
 """
-
+from copy import deepcopy
 from typing import Any, TypeAlias, TypedDict
 from datetime import datetime
 
@@ -47,6 +47,9 @@ def _create_event(data: Event, station_state: StationStateCache, trigger_time: d
     tsts = [station_state[tst] for tst in ("time_arrived", "time_doors_last_closed", "time_departed")]
     if any([trigger_time.timestamp() - (tst.timestamp() if tst else 0) < 0 for tst in tsts]):
         return None
+
+    data = deepcopy(data)
+    station_state = deepcopy(station_state)
 
     return {
         "vehicle": data["vehicle"],

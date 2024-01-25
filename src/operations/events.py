@@ -174,7 +174,7 @@ def create_events(state: VehicleState, value: AjoaikadataMsg) -> tuple[VehicleSt
     data = value["data"]
     event = None
 
-    if data["msg_type"] == 1:
+    if data["msg_type"] == 1 and not data.get("discard"):
         udp_state, event = _check_udp_event(udp_state, data)
 
     elif data["msg_type"] == 5 and not data.get("incomplete"):

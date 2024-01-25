@@ -45,6 +45,10 @@ def _get_next_id(packet_no: int) -> int:
 def _get_pattern_from_cache(cache: UDPMsgCache) -> list[AjoaikadataMsg]:
     msgs = []
     while len(cache["msgs"]) > 0:
+        if cache["msgs"][0][1]["data"]["msg_type"] != 1:
+            msg = heapq.heappop(cache["msgs"])[1]
+            msgs.append(msg)
+            continue
         if cache["msgs"][0][1]["data"]["content"]["packet_no"] != cache["waiting_for_no"]:
             break
 
@@ -60,7 +64,8 @@ def _add_to_cache(cache: UDPMsgCache, item: UDPCacheItem) -> list[AjoaikadataMsg
     heapq.heappush(cache["msgs"], item)
 
     if len(cache["msgs"]) > CACHE_MAX_SIZE:
-        cache["waiting_for_no"] = cache["msgs"][0][1]["data"]["content"]["packet_no"]
+        if cache["msgs"][0][1]["data"]["msg_type"] == 1:
+            cache["waiting_for_no"] = cache["msgs"][0][1]["data"]["content"]["packet_no"]
         return _get_pattern_from_cache(cache)
     return []
 
@@ -68,8 +73,14 @@ def _add_to_cache(cache: UDPMsgCache, item: UDPCacheItem) -> list[AjoaikadataMsg
 def reorder_messages(udp_cache: UDPMsgCache, value: AjoaikadataMsg) -> tuple[UDPMsgCache, list[AjoaikadataMsg]]:
     data = value["data"]
 
-    # No udp message, skip
+    # No udp message, add to the cache if there were items.
     if data["msg_type"] != 1:
+        tst: datetime = data["ntp_timestamp"]
+
+        if (len(udp_cache["msgs"]) > 0 and tst > udp_cache["msgs"][0][0]):
+            msgs = _add_to_cache(udp_cache, UDPCacheItem((tst, value)))
+            return udp_cache, msgs
+        
         return udp_cache, [value]
 
     packet_no: int = data["content"]["packet_no"]
@@ -84,7 +95,7 @@ def reorder_messages(udp_cache: UDPMsgCache, value: AjoaikadataMsg) -> tuple[UDP
     if tst < udp_cache["last_released_tst"]:
         # Too old message, mark as discarded - we are not waiting for this.
         value["data"]["discard"] = True
-        logger.warning(f"Discarded udp message, because it was too old: {value}")
+        logger.debug(f"Discarded udp message, because it was too old: {value}")
         return udp_cache, [value]
 
     if (
