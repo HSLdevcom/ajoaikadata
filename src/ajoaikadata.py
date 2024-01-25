@@ -14,6 +14,7 @@ from .ekeparser.schemas.jkv_beacon import JKVBeaconDataSchema
 from .operations.common import filter_none
 from .operations.balisedirection import create_directions_for_balises, create_empty_balise_cache
 from .operations.baliseparts import combine_balise_parts, create_empty_parts_cache
+from .operations.deduplication import deduplicate, create_deduplication_cache
 from .operations.events import create_events, create_empty_state
 from .operations.stationevents import create_station_events, init_vehicle_station_cache
 from .operations.parsing import csv_to_bytewax_msg, raw_msg_to_eke
@@ -29,7 +30,11 @@ postgres_client_stationevents = PostgresClient("stationevents")
 
 flow = Dataflow("readerparser")
 stream = op.input("reader_in", flow, AzureStorageInput())
-bytewax_msg_stream = op.map("csv_to_bytewax_msg", stream, csv_to_bytewax_msg)
+
+stream = op.map("csv_to_bytewax_msg", stream, csv_to_bytewax_msg)
+
+stream = op.stateful_map("deduplicate", stream, create_deduplication_cache, deduplicate)
+stream = op.filter_map("filter_none", stream, filter_none)
 
 
 eke_stream = op.map("raw_msg_to_eke", bytewax_msg_stream, raw_msg_to_eke)
