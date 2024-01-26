@@ -86,6 +86,11 @@ def reorder_messages(udp_cache: UDPMsgCache, value: AjoaikadataMsg) -> tuple[UDP
     packet_no: int = data["content"]["packet_no"]
     tst: datetime = data["ntp_timestamp"]
 
+    if not data["ntp_time_valid"]:
+        # Tst not valid. Discard.
+        value["data"]["discard"] = True
+        return udp_cache, [value]
+
     if udp_cache["waiting_for_no"] == -1:
         # first message, init metadata and return msg
         udp_cache["waiting_for_no"] = _get_next_id(packet_no)

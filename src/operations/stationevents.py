@@ -148,7 +148,7 @@ def create_station_events(
             if station_event_to_send:
                 last_station_state = create_empty_stationstate_cache()
 
-        case "cabin_changed":
+        case "cabin_changed" | "vehicle_ids_changed":
             # Train has stopped and probably will change the direction. Release the message. Never send doors / departed time.
             vehicle_state = vehicle_state | data["data"]
             last_station_state["time_departed"] = None
@@ -156,7 +156,7 @@ def create_station_events(
             station_event_to_send = _create_event(data, last_station_state, data["ntp_timestamp"])
             last_station_state = create_empty_stationstate_cache()
 
-        case "train_no_changed" | "vehicle_count_changed" | "vehicle_ids_changed":
+        case "train_no_changed" | "vehicle_count_changed":
             vehicle_state = vehicle_state | data["data"]
 
         case _:
