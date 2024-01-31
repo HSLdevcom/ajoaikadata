@@ -60,7 +60,7 @@ def header_parser(content: bytes) -> tuple[int, str, int, bool]:
 class EKEMessageSchema(Schema):
     FIELDS = [
         FieldParser(["msg_type", "msg_name", "msg_version", "ntp_time_valid"], 0, 1, header_parser),
-        FieldParser(["eke_timestamp"], 2, 6, partial(timestamp_with_ms_parser, endian="big")),
+        FieldParser(["eke_timestamp"], 2, 6, partial(timestamp_with_ms_parser, endian="big", use_tz=False)),
         FieldParser(["ntp_timestamp"], 7, 11, partial(timestamp_with_ms_parser, endian="big")),
     ]
     DATA_CONTENT = DataContentParser(
