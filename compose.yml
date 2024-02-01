@@ -4,16 +4,18 @@ services:
 
   ajoaikadata:
     build: .
-    
     environment:
       - BYTEWAX_PYTHON_FILE_PATH=app.ajoaikadata
-      - BYTEWAX_PYTHON_PARAMETERS=-w 4
+      - BYTEWAX_PYTHON_PARAMETERS=-w 6
+      - BYTEWAX_DATAFLOW_API_ENABLED=true
       - AZ_STORAGE_CONNECTION_STRING=${AZ_STORAGE_CONNECTION_STRING}
       - AZ_STORAGE_CONTAINER=${AZ_STORAGE_CONTAINER}
       - START_DATE=${START_DATE}
       - END_DATE=${END_DATE}
       - POSTGRES_CONN_STR=${POSTGRES_CONN_STR}
       - BALISE_DATA_FILE=/bytewax/app/util/balise_registry.csv
+    ports:
+      - 3030:3030
     volumes:
       - ./src:/bytewax/app
       - ./data:/data
@@ -36,3 +38,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - 9090:9090
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    volumes:
+      - ./monitoring/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - ./monitoring/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+      - ./monitoring/grafana/monitoring.json:/var/lib/grafana/dashboards/monitoring.json
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
