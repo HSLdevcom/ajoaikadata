@@ -113,7 +113,7 @@ class AzureStorageSource(StatefulSourcePartition):
 
 
 class AzureStorageInput(FixedPartitionedSource):
-    def __init__(self, batch_size: int = 1000, **fmtparams):
+    def __init__(self, batch_size: int = 3000, **fmtparams):
         dates = [date for date in daterange(START_DATE, END_DATE)]
 
         with _get_container_client() as container:
@@ -129,8 +129,8 @@ class AzureStorageInput(FixedPartitionedSource):
         self._fmtparams = fmtparams
 
     def list_parts(self):
-        """Each partition is a vehicle id. TODO: make this configurable."""
-        return [str(i) for i in range(1, 101)]
+        """Each partition is a vehicle id. TODO: make this configurable. Currently 81 vehicles."""
+        return [str(i) for i in range(1, 82)]
 
     def build_part(self, now, for_part, resume_state):
         return AzureStorageSource(self.blob_names, for_part, self._batch_size, self._fmtparams)

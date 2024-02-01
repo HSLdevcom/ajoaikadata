@@ -2,7 +2,7 @@
 Operations to order UDP messages.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import heapq
 from typing import TypedDict
 
@@ -77,17 +77,19 @@ def reorder_messages(udp_cache: UDPMsgCache, value: AjoaikadataMsg) -> tuple[UDP
     if data["msg_type"] != 1:
         tst: datetime = data["ntp_timestamp"]
 
-        if (len(udp_cache["msgs"]) > 0 and tst > udp_cache["msgs"][0][0]):
+        if len(udp_cache["msgs"]) > 0 and tst > udp_cache["msgs"][0][0]:
             msgs = _add_to_cache(udp_cache, UDPCacheItem((tst, value)))
             return udp_cache, msgs
-        
+
         return udp_cache, [value]
 
     packet_no: int = data["content"]["packet_no"]
     tst: datetime = data["ntp_timestamp"]
 
-    if not data["ntp_time_valid"]:
-        # Tst not valid. Discard.
+    if (data["ntp_timestamp"] > data["mqtt_timestamp"] + timedelta(seconds=30)) or (
+        data["ntp_timestamp"] < data["mqtt_timestamp"] - timedelta(minutes=30) and not data["ntp_time_valid"]
+    ):
+        # Tst not valid. (30 seconds higher mqtt_timestamp, or 30 minutes before MQTT tst and marked as invalid.) Discard message.
         value["data"]["discard"] = True
         return udp_cache, [value]
 
@@ -98,7 +100,7 @@ def reorder_messages(udp_cache: UDPMsgCache, value: AjoaikadataMsg) -> tuple[UDP
         return udp_cache, [value]
 
     if tst < udp_cache["last_released_tst"]:
-        # Too old message, mark as discarded - we are not waiting for this.
+        # Too old message, mark as discarded - we are not waiting anymore for this.
         value["data"]["discard"] = True
         logger.debug(f"Discarded udp message, because it was too old: {value}")
         return udp_cache, [value]
