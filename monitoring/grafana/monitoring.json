@@ -227,13 +227,30 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by(step_id) (rate(unary_on_item_duration_seconds_sum[5m])) / sum by(step_id) (rate(item_out_count_total[5m])) ",
+          "expr": "sum by(step_id) (rate(unary_on_item_duration_seconds_sum[5m])) / sum by(step_id) (rate(item_inp_count_total[5m]))",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "A",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "sum by(step_id) (rate(flat_map_batch_duration_seconds_sum{step_id!~\"^.*filter_none.*\"}[5m])) / sum by(step_id) (rate(item_inp_count_total[5m]))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "B",
           "useBackend": false
         }
       ],
