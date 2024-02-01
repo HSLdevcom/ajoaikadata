@@ -113,13 +113,30 @@
           "fullMetaSearch": false,
           "includeNullMetadata": false,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "Messages out",
           "range": true,
           "refId": "A",
           "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum(rate(item_out_count_total{step_id=\"readerparser.reader_in\"}[5m]))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": false,
+          "instant": false,
+          "legendFormat": "Messages read",
+          "range": true,
+          "refId": "B",
+          "useBackend": false
         }
       ],
-      "title": "Msg total rate out",
+      "title": "Message throughput",
       "type": "timeseries"
     },
     {
