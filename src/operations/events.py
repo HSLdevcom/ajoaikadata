@@ -46,6 +46,7 @@ class UDPState(TypedDict):
     vehicle_count: int | None
     all_vehicles: list[int] | None
     last_updated: datetime | None
+    tst_source: str | None
 
 
 class StationState(TypedDict):
@@ -61,6 +62,8 @@ VehicleState: TypeAlias = tuple[UDPState, StationState]
 
 class Event(TypedDict):
     vehicle: int
+    tst: datetime
+    tst_source: str
     ntp_timestamp: datetime
     eke_timestamp: datetime
     mqtt_timestamp: datetime
@@ -71,6 +74,8 @@ class Event(TypedDict):
 def _create_event(data: dict, event_type: str, event_data: dict) -> Event:
     return {
         "vehicle": data["vehicle"],
+        "tst": data["tst"],
+        "tst_source": data["tst_source"],
         "ntp_timestamp": data["ntp_timestamp"],
         "eke_timestamp": data["eke_timestamp"],
         "mqtt_timestamp": data["mqtt_timestamp"],
@@ -90,8 +95,9 @@ def create_empty_state() -> VehicleState:
             "vehicle_count": None,
             "all_vehicles": None,
             "last_updated": None,
+            "tst_source": None,
         },
-        {"station": None, "track": None, "direction":None,"event": None, "last_updated": None},
+        {"station": None, "track": None, "direction": None, "event": None, "last_updated": None},
     )
 
 
@@ -100,12 +106,13 @@ def _check_udp_event(last_state: UDPState, data: dict) -> Tuple[UDPState, Event 
     # but that shouldn't be a problem, because the next update will be triggered almost immidiately
     # on the next message. Just keep sure only the one attribute is updated at once, which is related to the event.
 
-    ntp_timestamp: datetime = data["ntp_timestamp"]
+    tst: datetime = data["tst"]
+
     # Initialize last_state if it is None
     for field in UDP_EVENT_FIELDS:
         if not field["ignore_none"] and last_state[field["name"]] is None:
             last_state[field["name"]] = data["content"][field["name"]]
-            last_state["last_updated"] = ntp_timestamp
+            last_state["last_updated"] = tst
 
     for field in UDP_EVENT_FIELDS:
         data_field = data["content"][field["name"]]
@@ -116,12 +123,12 @@ def _check_udp_event(last_state: UDPState, data: dict) -> Tuple[UDPState, Event 
             if not event_name:
                 return last_state, None
 
-            if last_state["last_updated"] and ntp_timestamp < last_state["last_updated"]:
+            if last_state["last_updated"] and tst < last_state["last_updated"]:
                 logger.warning(f"Tried to trigger {field['name']} event, but the message was old. Discarding {data}")
                 return last_state, None
 
             last_state[field["name"]] = data_field
-            last_state["last_updated"] = ntp_timestamp
+            last_state["last_updated"] = tst
             event_msg_data = {field["name"]: data_field}
             return last_state, _create_event(data, event_name, event_msg_data)
 
@@ -130,7 +137,7 @@ def _check_udp_event(last_state: UDPState, data: dict) -> Tuple[UDPState, Event 
 
 
 def _check_station_event(last_state: StationState, data: dict) -> Tuple[StationState, Event | None]:
-    ntp_timestamp = data["ntp_timestamp"]
+    tst = data["tst"]
     balise_id = data["content"]["balise_id"]
     direction = data["content"]["direction"]
     balise_key = f"{balise_id}_{direction}"
@@ -140,8 +147,13 @@ def _check_station_event(last_state: StationState, data: dict) -> Tuple[StationS
     if not balise_data:
         # Early return if balise didn't exist in the registry
         return last_state, None
-    
-    event_msg_data = {"station": balise_data["station"], "track": balise_data["track"], "direction": balise_data["train_direction"], "triggered_by": balise_key}
+
+    event_msg_data = {
+        "station": balise_data["station"],
+        "track": balise_data["track"],
+        "direction": balise_data["train_direction"],
+        "triggered_by": balise_key,
+    }
 
     # check if any of the fields has changed
     if (
@@ -150,7 +162,7 @@ def _check_station_event(last_state: StationState, data: dict) -> Tuple[StationS
         or last_state["direction"] != balise_data["train_direction"]
         or last_state["event"] != balise_data["type"].lower()
     ):
-        if last_state["last_updated"] and ntp_timestamp < last_state["last_updated"]:
+        if last_state["last_updated"] and tst < last_state["last_updated"]:
             logger.warning(f"Tried to trigger balise event, but the message was old. Discarding {data}")
             return last_state, None
 
@@ -159,8 +171,7 @@ def _check_station_event(last_state: StationState, data: dict) -> Tuple[StationS
         last_state["track"] = balise_data["track"]
         last_state["direction"] = balise_data["train_direction"]
         last_state["event"] = balise_data["type"].lower()
-        last_state["last_updated"] = ntp_timestamp
-
+        last_state["last_updated"] = tst
 
         return last_state, _create_event(data, balise_data["type"].lower(), event_msg_data)
 

@@ -54,7 +54,7 @@ def _get_pattern_from_cache(cache: UDPMsgCache) -> list[AjoaikadataMsg]:
 
         msg = heapq.heappop(cache["msgs"])[1]
         cache["waiting_for_no"] = _get_next_id(cache["waiting_for_no"])
-        cache["last_released_tst"] = msg["data"]["ntp_timestamp"]
+        cache["last_released_tst"] = msg["data"]["tst"]
         msgs.append(msg)
 
     return msgs
@@ -73,10 +73,19 @@ def _add_to_cache(cache: UDPMsgCache, item: UDPCacheItem) -> list[AjoaikadataMsg
 def reorder_messages(udp_cache: UDPMsgCache, value: AjoaikadataMsg) -> tuple[UDPMsgCache, list[AjoaikadataMsg]]:
     data = value["data"]
 
+    tst: datetime = data["ntp_timestamp"]
+
+    # Track the timestamp source. Use mqtt if ntp is way higher than mqtt.
+    if data["ntp_timestamp"] > data["mqtt_timestamp"] + timedelta(minutes=5):
+        tst = data["mqtt_timestamp"]
+        value["data"]["tst_source"] = "mqtt"
+    else:
+        value["data"]["tst_source"] = "ntp"
+
+    value["data"]["tst"] = tst
+
     # No udp message, add to the cache if there were items.
     if data["msg_type"] != 1:
-        tst: datetime = data["ntp_timestamp"]
-
         if len(udp_cache["msgs"]) > 0 and tst > udp_cache["msgs"][0][0]:
             msgs = _add_to_cache(udp_cache, UDPCacheItem((tst, value)))
             return udp_cache, msgs
@@ -84,12 +93,11 @@ def reorder_messages(udp_cache: UDPMsgCache, value: AjoaikadataMsg) -> tuple[UDP
         return udp_cache, [value]
 
     packet_no: int = data["content"]["packet_no"]
-    tst: datetime = data["ntp_timestamp"]
 
-    if (data["ntp_timestamp"] > data["mqtt_timestamp"] + timedelta(seconds=30)) or (
+    if (value["data"]["tst_source"] == "ntp") and (
         data["ntp_timestamp"] < data["mqtt_timestamp"] - timedelta(minutes=30) and not data["ntp_time_valid"]
     ):
-        # Tst not valid. (30 seconds higher mqtt_timestamp, or 30 minutes before MQTT tst and marked as invalid.) Discard message.
+        # Tst not valid. (is ntp timestamp and 30 minutes before MQTT tst and marked as invalid.) Discard message.
         value["data"]["discard"] = True
         return udp_cache, [value]
 

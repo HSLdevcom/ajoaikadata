@@ -23,19 +23,21 @@ from ..util.config import logger, read_from_env
 PG_TARGET_TABLE = {
     "messages": {
         "query": SQL(
-            "COPY staging.{staging} (ntp_timestamp, eke_timestamp, mqtt_timestamp, msg_type, vehicle_id, message) FROM STDIN;"
+            "COPY staging.{staging} (tst, ntp_timestamp, eke_timestamp, mqtt_timestamp, tst_source, msg_type, vehicle_id, message) FROM STDIN;"
         ),
         "post_query": SQL(
             """
-            INSERT INTO messages (ntp_timestamp, eke_timestamp, mqtt_timestamp, msg_type, vehicle_id, message)
-            SELECT ntp_timestamp, eke_timestamp, mqtt_timestamp, msg_type, vehicle_id, message FROM staging.{staging} ON CONFLICT DO NOTHING;
+            INSERT INTO messages (tst, ntp_timestamp, eke_timestamp, mqtt_timestamp, tst_source, msg_type, vehicle_id, message)
+            SELECT tst, ntp_timestamp, eke_timestamp, mqtt_timestamp, tst_source, msg_type, vehicle_id, message FROM staging.{staging} ON CONFLICT DO NOTHING;
             DELETE FROM staging.{staging};
             """
         ),
         "mapper": lambda data_obj: (
+            data_obj["tst"],
             data_obj["ntp_timestamp"],
             data_obj["eke_timestamp"],
             data_obj["mqtt_timestamp"],
+            data_obj["tst_source"],
             data_obj["msg_type"],
             data_obj["vehicle"],
             json.dumps(data_obj, default=str),
@@ -43,36 +45,42 @@ PG_TARGET_TABLE = {
     },
     "events": {
         "query": SQL(
-            "COPY staging.{staging} (ntp_timestamp, eke_timestamp, mqtt_timestamp, event_type, vehicle_id, data) FROM STDIN;"
+            "COPY staging.{staging} (tst, ntp_timestamp, eke_timestamp, mqtt_timestamp, tst_source, event_type, vehicle_id, data) FROM STDIN;"
         ),
         "post_query": SQL(
             """
-            INSERT INTO events (ntp_timestamp, eke_timestamp, mqtt_timestamp, event_type, vehicle_id, data)
-            SELECT ntp_timestamp, eke_timestamp, mqtt_timestamp, event_type, vehicle_id, data FROM staging.{staging} ON CONFLICT DO NOTHING;
+            INSERT INTO events (tst, ntp_timestamp, eke_timestamp, mqtt_timestamp, tst_source, event_type, vehicle_id, data)
+            SELECT tst, ntp_timestamp, eke_timestamp, mqtt_timestamp, tst_source, event_type, vehicle_id, data FROM staging.{staging} ON CONFLICT DO NOTHING;
             DELETE FROM staging.{staging};
             """
         ),
         "mapper": lambda data_obj: (
+            data_obj["tst"],
             data_obj["ntp_timestamp"],
             data_obj["eke_timestamp"],
             data_obj["mqtt_timestamp"],
+            data_obj["tst_source"],
             data_obj["event_type"],
             data_obj["vehicle"],
             json.dumps(data_obj["data"], default=str),
         ),
     },
     "stationevents": {
-        "query": SQL("COPY staging.{staging} (ntp_timestamp, eke_timestamp, vehicle_id, station, track, direction, data) FROM STDIN;"),
+        "query": SQL(
+            "COPY staging.{staging} (tst, ntp_timestamp, eke_timestamp, tst_source, vehicle_id, station, track, direction, data) FROM STDIN;"
+        ),
         "post_query": SQL(
             """
-            INSERT INTO stationevents (ntp_timestamp, eke_timestamp, vehicle_id, station, track, direction, data)
-            SELECT ntp_timestamp, eke_timestamp, vehicle_id, station, track, direction, data FROM staging.{staging} ON CONFLICT DO NOTHING;
+            INSERT INTO stationevents (tst, ntp_timestamp, eke_timestamp, tst_source, vehicle_id, station, track, direction, data)
+            SELECT tst, ntp_timestamp, eke_timestamp, tst_source, vehicle_id, station, track, direction, data FROM staging.{staging} ON CONFLICT DO NOTHING;
             DELETE FROM staging.{staging};
             """
         ),
         "mapper": lambda data_obj: (
+            data_obj["tst"],
             data_obj["ntp_timestamp"],
             data_obj["eke_timestamp"],
+            data_obj["tst_source"],
             data_obj["vehicle"],
             data_obj["station"],
             data_obj["track"],
