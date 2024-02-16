@@ -1,6 +1,8 @@
+from dataclasses import dataclass
 from typing import Any, Callable, List, Literal, Union
 
 
+@dataclass
 class FieldParser:
     """
     A helper class for parsing the fields.
@@ -13,13 +15,13 @@ class FieldParser:
         Note that the parser should return tha same amount of values in the same exact order than defined in `field_names`.
     """
 
-    def __init__(self, field_names: List[str], start_byte: int, end_byte: int, parser_function: Callable) -> None:
-        self.field_names = field_names
-        self.start_byte = start_byte
-        self.end_byte = end_byte
-        self.parser_function = parser_function
+    field_names: list[str]
+    start_byte: int
+    end_byte: int
+    parser_function: Callable
 
 
+@dataclass
 class DataContentParser:
     """
     A helper class for parsing the data content.
@@ -33,19 +35,11 @@ class DataContentParser:
         or to store them as a separated object under the field name defined by `data_field_name`.
     """
 
-    def __init__(
-        self,
-        start_byte: int,
-        schema_mapping: Union[dict[Any, "Schema"], "Schema", None] = None,
-        selector_field: str | None = None,
-        unpack_to_header_level: bool = False,
-        data_field_name: str = "content",
-    ) -> None:
-        self.start_byte = start_byte
-        self.schema_mapping = schema_mapping
-        self.selector_field = selector_field
-        self.unpack_to_header_level = unpack_to_header_level
-        self.data_field_name = data_field_name
+    start_byte: int
+    schema_mapping: Union[dict[Any, "Schema"], "Schema", None] = None
+    selector_field: str | None = None
+    unpack_to_header_level: bool = False
+    data_field_name: str = "content"
 
 
 class Schema:
