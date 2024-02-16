@@ -9,7 +9,12 @@ from typing import Any
 
 from bytewax.inputs import FixedPartitionedSource, StatefulSourcePartition, batch
 
-from ..util.config import logger
+from ..util.config import logger, read_from_env
+
+
+(BYTEWAX_BATCH_SIZE,) = read_from_env(("BYTEWAX_BATCH_SIZE",), ("1000",))
+BYTEWAX_BATCH_SIZE = int(BYTEWAX_BATCH_SIZE)
+
 
 def _readlines(files):
     """Turn a list of files into a generator of lines but support `tell`.
@@ -72,7 +77,7 @@ class CSVDirSource(StatefulSourcePartition):
 
 
 class CSVDirInput(FixedPartitionedSource):
-    def __init__(self, path: Path, batch_size: int = 1000, **fmtparams):
+    def __init__(self, path: Path, batch_size: int = BYTEWAX_BATCH_SIZE, **fmtparams):
         if not isinstance(path, Path):
             path = Path(path)
 

@@ -66,6 +66,7 @@ POSTGRES_DB=postgres
 
 # Bytewax
 BYTEWAX_WORKER_COUNT=4          <-- How many workers will be deployed into one container
+BYTEWAX_BATCH_SIZE=5000         <-- How large batches ajoaikadata will read from the source at once
 ```
 
 

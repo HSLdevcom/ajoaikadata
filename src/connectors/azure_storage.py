@@ -2,7 +2,7 @@
 Input connection code for reading EKE data blobs from Azure Storage.
 """
 
-from collections.abc import Generator, Sequence
+from collections.abc import Iterator, Sequence
 from csv import DictReader
 from datetime import datetime, timedelta
 import gzip
@@ -24,9 +24,11 @@ logging.getLogger("azure").setLevel(logging.WARNING)
 (AZ_STORAGE_CONNECTION_STRING, AZ_STORAGE_CONTAINER, START_DATE, END_DATE) = read_from_env(
     ("AZ_STORAGE_CONNECTION_STRING", "AZ_STORAGE_CONTAINER", "START_DATE", "END_DATE")
 )
+(BYTEWAX_BATCH_SIZE,) = read_from_env(("BYTEWAX_BATCH_SIZE",), ("1000",))
+BYTEWAX_BATCH_SIZE = int(BYTEWAX_BATCH_SIZE)
 
 
-def daterange(date1: str, date2: str) -> Generator[str, None, None]:
+def daterange(date1: str, date2: str) -> Iterator[str]:
     # Convert the input strings to datetime objects
     start = datetime.strptime(date1, "%Y-%m-%d")
     end = datetime.strptime(date2, "%Y-%m-%d")
@@ -41,7 +43,7 @@ def _get_container_client() -> ContainerClient:
     )
 
 
-def _readlines(files: Sequence[str]):
+def _readlines(files: Sequence[str]) -> Iterator[str]:
     """Turn a list of files into a generator of lines but support `tell`.
 
     Python files don't support `tell` to learn the offset if you use
@@ -63,22 +65,17 @@ def _readlines(files: Sequence[str]):
                         time.sleep(10)
                         continue
                     break
-                    
 
                 stream.seek(0)
-                f = gzip.open(stream, "rt", newline="")
+                with gzip.open(stream, "rt", newline="") as f:
+                    next(f)  # skip header
+                    counter = 0
 
-                f.readline()  # skip header
-                counter = 0
-                while True:
-                    line = str(f.readline())  # ensure it's string
-                    if len(line) <= 0:
-                        break
-                    yield line
-                    counter += 1
+                    for line in f:
+                        yield str(line)  # ensure it's string
+                        counter += 1
 
-                logger.info(f"File {file_name} read complete. Read {counter} lines.")
-                f.close()
+                    logger.info(f"File {file_name} read complete. Read {counter} lines.")
 
 
 class AzureStorageSource(StatefulSourcePartition):
@@ -113,7 +110,7 @@ class AzureStorageSource(StatefulSourcePartition):
 
 
 class AzureStorageInput(FixedPartitionedSource):
-    def __init__(self, batch_size: int = 3000, **fmtparams):
+    def __init__(self, batch_size: int = BYTEWAX_BATCH_SIZE, **fmtparams):
         dates = [date for date in daterange(START_DATE, END_DATE)]
 
         with _get_container_client() as container:
