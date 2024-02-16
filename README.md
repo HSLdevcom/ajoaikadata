@@ -15,7 +15,7 @@ The PoC uses [Apache Pulsar](https://pulsar.apache.org) messaging platform (opti
 
 
 The tested versions are:
-- Bytewax 0.18.0
+- Bytewax 0.18.2
 - Python 3.11
 - Pulsar 3.1
 - Postgres 15
@@ -64,8 +64,8 @@ POSTGRES_USER=postgres
 POSTGRES_DB=postgres
 
 
-# Pulsar
-PULSAR_CONN_STR="pulsar://pulsar:6650"
+# Bytewax
+BYTEWAX_WORKER_COUNT=4          <-- How many workers will be deployed into one container
 ```
 
 
