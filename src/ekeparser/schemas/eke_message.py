@@ -1,4 +1,6 @@
+from datetime import datetime
 from functools import partial
+from typing import Any, TypedDict, cast
 
 from .general_parsers import timestamp_with_ms_parser
 from .schema import Schema, FieldParser, DataContentParser
@@ -57,6 +59,16 @@ def header_parser(content: bytes) -> tuple[int, str, int, bool]:
     return msg_type, msg_name, msg_version, ntp_time_valid
 
 
+class EKEMessageType(TypedDict):
+    msg_type: int
+    msg_name: str
+    msg_version: int
+    ntp_time_valid: bool
+    eke_timestamp: datetime
+    ntp_timestamp: datetime
+    content: Any
+
+
 class EKEMessageSchema(Schema):
     FIELDS = [
         FieldParser(["msg_type", "msg_name", "msg_version", "ntp_time_valid"], 0, 1, header_parser),
@@ -68,3 +80,6 @@ class EKEMessageSchema(Schema):
         DATA_SCHEMA_MAPPING,
         "msg_type",
     )
+
+    def parse_content(self, content: bytes) -> EKEMessageType | None:
+        return cast(EKEMessageType, super().parse_content(content))
