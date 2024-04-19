@@ -83,7 +83,7 @@ class PulsarSource(StatelessSourcePartition):
     def next_awake(self) -> datetime | None:
         return None
 
-    def next_batch(self, sched) -> List[AjoaikadataMsgWithKey]:
+    def next_batch(self) -> List[AjoaikadataMsgWithKey]:
         msgs: List[pulsar.Message] = self.consumer.batch_receive()
         return [
             (
@@ -102,7 +102,7 @@ class PulsarInput(DynamicSource):
         super().__init__()
         self.client = client
 
-    def build(self, now, worker_index: int, worker_count: int):
+    def build(self, step_id, worker_index: int, worker_count: int):
         return PulsarSource(self.client, worker_index)
 
 
@@ -111,8 +111,8 @@ class PulsarSink(StatelessSinkPartition):
         self.client = client
         self.producer = self.client.get_producer(worker_index)
 
-    def write_batch(self, data: List[AjoaikadataMsgWithKey]):
-        for msg in data:
+    def write_batch(self, items: List[AjoaikadataMsgWithKey]):
+        for msg in items:
             key, content = msg
             msg_data = json.dumps(content.get("data"), default=str)
             self.producer.send_async(msg_data.encode("utf-8"), callback=None, partition_key=key)
@@ -127,5 +127,5 @@ class PulsarOutput(DynamicSink):
         super().__init__()
         self.client = client
 
-    def build(self, worker_index: int, worker_count: int):
+    def build(self, step_id, worker_index: int, worker_count: int):
         return PulsarSink(self.client, worker_index)

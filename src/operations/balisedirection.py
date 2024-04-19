@@ -50,8 +50,11 @@ def _calculate_direction(balise_msg1: AjoaikadataMsg, balise_msg2: AjoaikadataMs
 
 
 def create_directions_for_balises(
-    balise_cache: BaliseDirectionCache, value: AjoaikadataMsg
+    balise_cache: BaliseDirectionCache | None, value: AjoaikadataMsg
 ) -> tuple[BaliseDirectionCache, AjoaikadataMsg]:
+    if not balise_cache:
+        balise_cache = create_empty_balise_cache()
+
     data = value["data"]
 
     # No complete balise message, skip

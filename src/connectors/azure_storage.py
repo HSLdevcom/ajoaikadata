@@ -99,7 +99,7 @@ class AzureStorageSource(StatefulSourcePartition):
         )
         self._batcher = batch(self.reader, batch_size)
 
-    def next_batch(self, sched):
+    def next_batch(self):
         return next(self._batcher)
 
     def snapshot(self) -> Any:
@@ -129,5 +129,5 @@ class AzureStorageInput(FixedPartitionedSource):
         """Each partition is a vehicle id. TODO: make this configurable. Currently 81 vehicles."""
         return [str(i) for i in range(1, 82)]
 
-    def build_part(self, now, for_part, resume_state):
+    def build_part(self, step_id, for_part, resume_state):
         return AzureStorageSource(self.blob_names, for_part, self._batch_size, self._fmtparams)

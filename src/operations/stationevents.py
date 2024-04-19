@@ -56,7 +56,7 @@ def _create_event(data: Event, station_state: StationStateCache, trigger_time: d
 
     return {
         "vehicle": data["vehicle"],
-        "tst": data["tst"],
+        "tst": data["tst_corrected"],
         "tst_source": data["tst_source"],
         "ntp_timestamp": data["ntp_timestamp"],
         "eke_timestamp": data["eke_timestamp"],
@@ -90,8 +90,11 @@ def init_vehicle_station_cache() -> tuple[VehicleState, StationStateCache]:
 
 
 def create_station_events(
-    last_state: tuple[VehicleState, StationStateCache], value: AjoaikadataMsg
+    last_state: tuple[VehicleState, StationStateCache] | None, value: AjoaikadataMsg
 ) -> tuple[tuple[VehicleState, StationStateCache], AjoaikadataMsg]:
+    if not last_state:
+        last_state = init_vehicle_station_cache()
+    
     vehicle_state, last_station_state = last_state
 
     data: Event = value["data"]
@@ -102,7 +105,7 @@ def create_station_events(
         case "arrival":
             # Init station and track. Send event if the existing station was there (means we didn't receive the departure event.)
             if last_station_state["station"]:
-                station_event_to_send = _create_event(data, last_station_state, data["tst"])
+                station_event_to_send = _create_event(data, last_station_state, data["tst_corrected"])
                 # Clear cache only if event will be sent.
                 if station_event_to_send:
                     last_station_state = create_empty_stationstate_cache()
@@ -115,13 +118,13 @@ def create_station_events(
             # Override the values that are earlier than the event.
             for tst_field in ("time_arrived", "time_doors_last_closed", "time_departed"):
                 tst = last_station_state[tst_field]
-                if tst and tst.timestamp() < data["tst"].timestamp():
+                if tst and tst.timestamp() < data["tst_corrected"].timestamp():
                     last_station_state[tst_field] = None
 
         case "stopped":
             # Update arrival time. If doors were not opened or station is missing, override the value.
             if not last_station_state.get("time_arrived") or not last_station_state.get("time_doors_last_closed"):
-                last_station_state["time_arrived"] = data["tst"]
+                last_station_state["time_arrived"] = data["tst_corrected"]
 
         case "doors_opened":
             # Does nothing at the moment
@@ -129,11 +132,11 @@ def create_station_events(
 
         case "doors_closed":
             # Update last closed time. Always override, because we want to have the last value.
-            last_station_state["time_doors_last_closed"] = data["tst"]
+            last_station_state["time_doors_last_closed"] = data["tst_corrected"]
 
         case "moving":
             # Update departure time
-            last_station_state["time_departed"] = data["tst"]
+            last_station_state["time_departed"] = data["tst_corrected"]
 
         case "departure":
             # release the event
@@ -149,7 +152,7 @@ def create_station_events(
 
             if not last_station_state["arrival_vehicle_state"]:
                 last_station_state["arrival_vehicle_state"] = vehicle_state
-            station_event_to_send = _create_event(data, last_station_state, data["tst"])
+            station_event_to_send = _create_event(data, last_station_state, data["tst_corrected"])
             if station_event_to_send:
                 last_station_state = create_empty_stationstate_cache()
 
@@ -158,7 +161,7 @@ def create_station_events(
             vehicle_state = vehicle_state | data["data"]
             last_station_state["time_departed"] = None
             last_station_state["time_doors_last_closed"] = None
-            station_event_to_send = _create_event(data, last_station_state, data["tst"])
+            station_event_to_send = _create_event(data, last_station_state, data["tst_corrected"])
             last_station_state = create_empty_stationstate_cache()
 
         case "train_no_changed" | "vehicle_count_changed":

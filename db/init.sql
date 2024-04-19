@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 
 CREATE TABLE IF NOT EXISTS events (
-    tst TIMESTAMPTZ NOT NULL,
+    tst TIMESTAMP NOT NULL,
+    tst_corrected TIMESTAMPTZ NOT NULL,
     ntp_timestamp TIMESTAMPTZ NOT NULL,
     eke_timestamp TIMESTAMP NOT NULL,
     mqtt_timestamp TIMESTAMPTZ NOT NULL,

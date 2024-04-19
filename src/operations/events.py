@@ -5,7 +5,7 @@ Operations related to create events from eke message stream.
 from datetime import datetime
 from typing import Tuple, TypeAlias, TypedDict
 
-from ..util.ajoaikadatamsg import AjoaikadataMsg
+from ..util.ajoaikadatamsg import AjoaikadataMsg, EKEMessageTypeWithMQTTDetails
 from ..util.balise_registry import balise_registry
 
 from ..util.config import logger
@@ -63,6 +63,7 @@ VehicleState: TypeAlias = tuple[UDPState, StationState]
 class Event(TypedDict):
     vehicle: int
     tst: datetime
+    tst_corrected: datetime
     tst_source: str
     ntp_timestamp: datetime
     eke_timestamp: datetime
@@ -71,10 +72,11 @@ class Event(TypedDict):
     data: dict
 
 
-def _create_event(data: dict, event_type: str, event_data: dict) -> Event:
+def _create_event(data: EKEMessageTypeWithMQTTDetails, event_type: str, event_data: dict) -> Event:
     return {
         "vehicle": data["vehicle"],
         "tst": data["tst"],
+        "tst_corrected": data["tst_corrected"],
         "tst_source": data["tst_source"],
         "ntp_timestamp": data["ntp_timestamp"],
         "eke_timestamp": data["eke_timestamp"],
@@ -101,7 +103,7 @@ def create_empty_state() -> VehicleState:
     )
 
 
-def _check_udp_event(last_state: UDPState, data: dict) -> Tuple[UDPState, Event | None]:
+def _check_udp_event(last_state: UDPState, data: EKEMessageTypeWithMQTTDetails) -> Tuple[UDPState, Event | None]:
     # Send event from preconfigured fields. It's not supported to send multiple events at the same time,
     # but that shouldn't be a problem, because the next update will be triggered almost immidiately
     # on the next message. Just keep sure only the one attribute is updated at once, which is related to the event.
@@ -136,7 +138,7 @@ def _check_udp_event(last_state: UDPState, data: dict) -> Tuple[UDPState, Event 
     return last_state, None
 
 
-def _check_station_event(last_state: StationState, data: dict) -> Tuple[StationState, Event | None]:
+def _check_station_event(last_state: StationState, data: EKEMessageTypeWithMQTTDetails) -> Tuple[StationState, Event | None]:
     tst = data["tst"]
     balise_id = data["content"]["balise_id"]
     direction = data["content"]["direction"]
@@ -179,7 +181,10 @@ def _check_station_event(last_state: StationState, data: dict) -> Tuple[StationS
     return last_state, _create_event(data, f"{balise_data['type'].lower()}_debug", event_msg_data)
 
 
-def create_events(state: VehicleState, value: AjoaikadataMsg) -> tuple[VehicleState, AjoaikadataMsg]:
+def create_events(state: VehicleState | None, value: AjoaikadataMsg) -> tuple[VehicleState, AjoaikadataMsg]:
+    if not state:
+        state = create_empty_state()
+
     udp_state, balise_state = state
 
     data = value["data"]

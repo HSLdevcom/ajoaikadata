@@ -40,9 +40,15 @@ def _parse_balise_msg_from_parts(msg_part1: AjoaikadataMsg, msg_part2: Ajoaikada
 
 
 def combine_balise_parts(
-    parts_cache: BalisePartsCache, value: AjoaikadataMsg
+    parts_cache: BalisePartsCache | None, value: AjoaikadataMsg
 ) -> tuple[BalisePartsCache, AjoaikadataMsg]:
+    if not parts_cache:
+        parts_cache = create_empty_parts_cache()
+
     data = value["data"]
+
+    if not data:
+        return parts_cache, value
 
     # No balise message, skip
     if data["msg_type"] != 5:

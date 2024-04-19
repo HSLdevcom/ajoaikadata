@@ -66,7 +66,7 @@ class CSVDirSource(StatefulSourcePartition):
         )
         self._batcher = batch(self.reader, batch_size)
 
-    def next_batch(self, sched):
+    def next_batch(self):
         return next(self._batcher)
 
     def snapshot(self) -> Any:
@@ -89,5 +89,5 @@ class CSVDirInput(FixedPartitionedSource):
         """Each partition is a vehicle id. TODO: make this configurable."""
         return [str(i) for i in range(1, 101)]
 
-    def build_part(self, now, for_part, resume_state):
+    def build_part(self, step_id, for_part, resume_state):
         return CSVDirSource(self._path, for_part, self._batch_size, self._fmtparams)

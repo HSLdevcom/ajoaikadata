@@ -43,7 +43,7 @@ def _get_next_id(packet_no: int) -> int:
 
 
 def _get_pattern_from_cache(cache: UDPMsgCache) -> list[AjoaikadataMsg]:
-    msgs = []
+    msgs: list[AjoaikadataMsg] = []
     while len(cache["msgs"]) > 0:
         if cache["msgs"][0][1]["data"]["msg_type"] != 1:
             msg = heapq.heappop(cache["msgs"])[1]
@@ -54,7 +54,8 @@ def _get_pattern_from_cache(cache: UDPMsgCache) -> list[AjoaikadataMsg]:
 
         msg = heapq.heappop(cache["msgs"])[1]
         cache["waiting_for_no"] = _get_next_id(cache["waiting_for_no"])
-        cache["last_released_tst"] = msg["data"]["tst"]
+        if msg and msg["data"] is not None:
+            cache["last_released_tst"] = msg["data"]["tst"]
         msgs.append(msg)
 
     return msgs
@@ -70,19 +71,19 @@ def _add_to_cache(cache: UDPMsgCache, item: UDPCacheItem) -> list[AjoaikadataMsg
     return []
 
 
-def reorder_messages(udp_cache: UDPMsgCache, value: AjoaikadataMsg) -> tuple[UDPMsgCache, list[AjoaikadataMsg]]:
+def reorder_messages(udp_cache: UDPMsgCache | None, value: AjoaikadataMsg) -> tuple[UDPMsgCache, list[AjoaikadataMsg]]:
+    if not udp_cache:
+        udp_cache = create_empty_udp_cache()
+
+    if not value["data"]:
+        return udp_cache, [value]
+
     data = value["data"]
 
-    tst: datetime = data["ntp_timestamp"]
+    tst = data.get("tst")
 
-    # Track the timestamp source. Use mqtt if ntp is way higher than mqtt.
-    if data["ntp_timestamp"] > data["mqtt_timestamp"] + timedelta(minutes=5):
-        tst = data["mqtt_timestamp"]
-        value["data"]["tst_source"] = "mqtt"
-    else:
-        value["data"]["tst_source"] = "ntp"
-
-    value["data"]["tst"] = tst
+    if not tst:
+        return udp_cache, [value]
 
     # No udp message, add to the cache if there were items.
     if data["msg_type"] != 1:
@@ -93,13 +94,6 @@ def reorder_messages(udp_cache: UDPMsgCache, value: AjoaikadataMsg) -> tuple[UDP
         return udp_cache, [value]
 
     packet_no: int = data["content"]["packet_no"]
-
-    if (value["data"]["tst_source"] == "ntp") and (
-        data["ntp_timestamp"] < data["mqtt_timestamp"] - timedelta(minutes=30) and not data["ntp_time_valid"]
-    ):
-        # Tst not valid. (is ntp timestamp and 30 minutes before MQTT tst and marked as invalid.) Discard message.
-        value["data"]["discard"] = True
-        return udp_cache, [value]
 
     if udp_cache["waiting_for_no"] == -1:
         # first message, init metadata and return msg

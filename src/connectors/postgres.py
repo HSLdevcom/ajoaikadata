@@ -45,17 +45,18 @@ PG_TARGET_TABLE = {
     },
     "events": {
         "query": SQL(
-            "COPY staging.{staging} (tst, ntp_timestamp, eke_timestamp, mqtt_timestamp, tst_source, event_type, vehicle_id, data) FROM STDIN;"
+            "COPY staging.{staging} (tst, tst_corrected, ntp_timestamp, eke_timestamp, mqtt_timestamp, tst_source, event_type, vehicle_id, data) FROM STDIN;"
         ),
         "post_query": SQL(
             """
-            INSERT INTO events (tst, ntp_timestamp, eke_timestamp, mqtt_timestamp, tst_source, event_type, vehicle_id, data)
-            SELECT tst, ntp_timestamp, eke_timestamp, mqtt_timestamp, tst_source, event_type, vehicle_id, data FROM staging.{staging} ON CONFLICT DO NOTHING;
+            INSERT INTO events (tst, tst_corrected, ntp_timestamp, eke_timestamp, mqtt_timestamp, tst_source, event_type, vehicle_id, data)
+            SELECT tst, tst_corrected, ntp_timestamp, eke_timestamp, mqtt_timestamp, tst_source, event_type, vehicle_id, data FROM staging.{staging} ON CONFLICT DO NOTHING;
             DELETE FROM staging.{staging};
             """
         ),
         "mapper": lambda data_obj: (
             data_obj["tst"],
+            data_obj["tst_corrected"],
             data_obj["ntp_timestamp"],
             data_obj["eke_timestamp"],
             data_obj["mqtt_timestamp"],
@@ -147,8 +148,8 @@ class PostgresSink(StatelessSinkPartition):
         self.id = id
         self.client.prepare_staging_table(self.id)
 
-    def write_batch(self, data: List[AjoaikadataMsgWithKey]):
-        self.client.insert(data, self.id)
+    def write_batch(self, items: List[AjoaikadataMsgWithKey]):
+        self.client.insert(items, self.id)
 
     def close(self):
         self.client.close()
@@ -161,5 +162,5 @@ class PostgresOutput(DynamicSink):
         # Identified is used to separate outputs if there are multiple outputs for the same target
         self.identifier = identifier
 
-    def build(self, worker_index, worker_count):
+    def build(self, step_id, worker_index, worker_count):
         return PostgresSink(self.client, id=f"{self.identifier}{worker_index}")
