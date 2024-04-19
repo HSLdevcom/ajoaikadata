@@ -1,4 +1,6 @@
-from .general_parsers import float_parser, int_parser, coordinate_parser, timestamp_str_parser
+from functools import partial
+
+from .general_parsers import float_parser, int_parser, coordinate_parser, timestamp_parser
 from .schema import Schema, FieldParser
 
 CABIN_TYPES = {0b10: "A", 0b01: "B", 0b11: "AB"}
@@ -12,6 +14,7 @@ def doors_parser(content: bytes) -> bool:
         if byte & 0x3F:
             return True  # early return if any of the bits are set
     return False
+
 
 def cabin_parser(content: bytes) -> str | None:
     bits = content[0] & 0x3  # Last 2 bits
@@ -39,5 +42,5 @@ class StadlerUDPSchema(Schema):
         FieldParser(["train_no"], 156, 157, int_parser),
         FieldParser(["loc_x"], 160, 163, coordinate_parser),
         FieldParser(["loc_y"], 164, 167, coordinate_parser),
-        FieldParser(["teleste_timestamp"], 168, 171, timestamp_str_parser),
+        FieldParser(["teleste_timestamp"], 168, 171, partial(timestamp_parser, use_tz=False)),
     ]

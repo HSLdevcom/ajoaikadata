@@ -6,12 +6,12 @@ HEADER_SETTINGS = {
 SCHEMA_SETTINGS = {
     1: {},
     2: {"ignore": True},
-    3: {"ignore": True},
-    4: {"ignore": True},
+    3: {},
+    4: {},
     5: {},
     6: {"ignore": True},
     7: {"ignore": True},
     8: {"ignore": True},
     9: {"ignore": True},
-    10: {"ignore": True},
+    10: {},
 }

@@ -7,20 +7,23 @@ from .schema import Schema, FieldParser, DataContentParser
 
 from .stadler_udp import StadlerUDPSchema
 from .jkv_beacon import JKVBeaconSchema
+from .jkv_struct import JKVStructSchema
+from .io_struct import IOStructSchema
+from .time_changed_data import TimeChangedDataSchema
 
 from ..config import SCHEMA_SETTINGS
 
 DATA_SCHEMA_CLASS_MAPPING = {
     1: StadlerUDPSchema,
     2: Schema,
-    3: Schema,
-    4: Schema,
+    3: IOStructSchema,
+    4: JKVStructSchema,
     5: JKVBeaconSchema,
     6: Schema,
     7: Schema,
     8: Schema,
     9: Schema,
-    10: Schema,
+    10: TimeChangedDataSchema,
 }
 
 DATA_SCHEMA_MAPPING: dict[int, Schema] = {

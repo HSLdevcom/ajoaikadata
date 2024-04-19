@@ -45,7 +45,7 @@ def raw_msg_to_eke(msg: AjoaikadataRawMsgWithKey) -> AjoaikadataMsgWithKey:
     try:
         parsed = parse_eke_data(data["raw"])
         if parsed:
-            result: EKEMessageTypeWithMQTTDetails = {**parsed, "mqtt_timestamp": mqtt_timestamp, "vehicle": vehicle}
+            result: EKEMessageTypeWithMQTTDetails = {**parsed, "mqtt_timestamp": mqtt_timestamp, "vehicle": int(vehicle)}
             return (key, {"data": result})
 
         return (key, {"data": None})
