@@ -11,6 +11,7 @@ services:
       - AZ_STORAGE_CONTAINER=${AZ_STORAGE_CONTAINER}
       - START_DATE=${START_DATE}
       - END_DATE=${END_DATE}
+      - VEHICLE_LIST=${VEHICLE_LIST}
       - POSTGRES_CONN_STR=${POSTGRES_CONN_STR}
       - BALISE_DATA_FILE=/bytewax/app/util/balise_registry.csv
     ports:

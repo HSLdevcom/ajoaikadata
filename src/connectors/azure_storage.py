@@ -24,6 +24,8 @@ logging.getLogger("azure").setLevel(logging.WARNING)
 (AZ_STORAGE_CONNECTION_STRING, AZ_STORAGE_CONTAINER, START_DATE, END_DATE) = read_from_env(
     ("AZ_STORAGE_CONNECTION_STRING", "AZ_STORAGE_CONTAINER", "START_DATE", "END_DATE")
 )
+(VEHICLE_LIST,) = read_from_env(("VEHICLE_LIST",), ("",), False)
+VEHICLE_LIST = VEHICLE_LIST.split(",")
 (BYTEWAX_BATCH_SIZE,) = read_from_env(("BYTEWAX_BATCH_SIZE",), ("1000",))
 BYTEWAX_BATCH_SIZE = int(BYTEWAX_BATCH_SIZE)
 
@@ -116,9 +118,14 @@ class AzureStorageInput(FixedPartitionedSource):
         with _get_container_client() as container:
             logger.info("Downloading blob lists...")
 
-            self.blob_names: list[str] = [
-                blob.name for date_str in dates for blob in container.list_blobs(name_starts_with=date_str)
-            ]
+            vehicle_list_regex = "|".join(VEHICLE_LIST) if VEHICLE_LIST else r"\d+"
+
+            self.blob_names: list[str] = list(
+                filter(
+                    lambda b: re.match(rf".*vehicle_({vehicle_list_regex}).*", b),
+                    [blob.name for date_str in dates for blob in container.list_blobs(name_starts_with=date_str)],
+                )
+            )
 
             logger.info(f"Blob names downloaded! {len(self.blob_names)} blobs will be processed.")
 

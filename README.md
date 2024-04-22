@@ -52,6 +52,9 @@ Template:
 START_DATE=2024-01-10           <-- the first date that will be imported to Ajoaikadata
 END_DATE=2024-01-14             <-- the last date that will be imported
 
+# Vehicles
+VEHICLE_LIST=53,54              <-- comma separated list to filter vehicles, use only for debug
+
 # Azure storage connections
 AZ_STORAGE_CONNECTION_STRING=   <-- connection string to the Azure Storage account
 AZ_STORAGE_CONTAINER=           <-- container name where EKE data is stored
