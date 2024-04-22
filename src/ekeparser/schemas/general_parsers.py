@@ -4,6 +4,11 @@ import struct
 from typing import Literal
 
 
+def str_parser(content: bytes) -> str:
+    """Bytes to string"""
+    return content.decode("ascii")
+
+
 def int_parser(content: bytes, endian: Literal["big", "little"] = "little") -> int:
     """Bytes to int"""
     return int.from_bytes(content, endian)
@@ -17,7 +22,7 @@ def float_parser(content: bytes) -> float:
 def timestamp_parser(content: bytes, endian: Literal["big", "little"] = "little", use_tz: bool = True) -> datetime:
     """Big endian bytes to datetime"""
     val = int_parser(content, endian)
-    return datetime.fromtimestamp(val, tz = timezone.utc if use_tz else None)
+    return datetime.fromtimestamp(val, tz=timezone.utc if use_tz else None)
 
 
 def timestamp_str_parser(content: bytes, endian: Literal["big", "little"] = "little", use_tz: bool = True) -> str:

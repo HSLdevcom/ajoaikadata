@@ -9,6 +9,7 @@ from .stadler_udp import StadlerUDPSchema
 from .jkv_beacon import JKVBeaconSchema
 from .jkv_struct import JKVStructSchema
 from .io_struct import IOStructSchema
+from .jkv_fault_msg import JKVFaultMsgSchema
 from .time_changed_data import TimeChangedDataSchema
 
 from ..config import SCHEMA_SETTINGS
@@ -20,7 +21,7 @@ DATA_SCHEMA_CLASS_MAPPING = {
     4: JKVStructSchema,
     5: JKVBeaconSchema,
     6: Schema,
-    7: Schema,
+    7: JKVFaultMsgSchema,
     8: Schema,
     9: Schema,
     10: TimeChangedDataSchema,
