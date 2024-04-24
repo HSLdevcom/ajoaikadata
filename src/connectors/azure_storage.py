@@ -122,7 +122,7 @@ class AzureStorageInput(FixedPartitionedSource):
 
             self.blob_names: list[str] = list(
                 filter(
-                    lambda b: re.match(rf".*vehicle_({vehicle_list_regex}).*", b),
+                    lambda b: re.match(rf".*vehicle_({vehicle_list_regex})\..*", b),
                     [blob.name for date_str in dates for blob in container.list_blobs(name_starts_with=date_str)],
                 )
             )

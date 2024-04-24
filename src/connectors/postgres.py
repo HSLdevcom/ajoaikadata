@@ -139,6 +139,7 @@ class PostgresClient:
             with conn.cursor() as cur:
                 for table in self.staging_tables:
                     cur.execute(SQL("DROP TABLE IF EXISTS staging.{table}").format(table=Identifier(table)))
+        # TODO: this way the same pool is closed multiple times causing errors on exit
         self.pool.close()
 
 
