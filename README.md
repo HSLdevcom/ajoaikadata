@@ -35,6 +35,8 @@ The tested versions are:
 
 - [`tests`](./tests/): Tests for the data flow and operations.
 
+There is more information written in Readme documents of modules.
+
 ## Installation and running services
 
 In general, Bytewax applications are started with Bytewax.run command, like this:
@@ -144,3 +146,8 @@ pytest
 ```
 
 Currently, there are a few tests created for dev purposes but the coverage is not yet good. Before going for production, more tests needs to be implemented.
+
+## Monitoring
+
+The default configuration of Docker Compose sets up monitoring resources. It's done with Prometheus and Grafana. Monitoring can be opened on the browser from `http://localhost:3000` when the service is up and running.
+
